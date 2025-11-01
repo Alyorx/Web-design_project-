@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AdminPage - PeerMentors</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/3.5.0/remixicon.css">
+</head>
+<body>
+   <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">Admin Control</div>
+      <nav class="nav">
+        <a class="nav-item active" data-section="overview">Overview</a>
+        <a class="nav-item" data-section="courses">Courses</a>
+        <a class="nav-item" data-section="instructors">Instructors</a>
+        <a class="nav-item" data-section="students">Students</a>
+        <a class="nav-item" data-section="payments">Payments</a>
+        <a class="nav-item" data-section="reviews">Reviews</a>
+        <a class="nav-item" data-section="settings">Settings</a>
+      </nav>
+      <div class="sidebar-footer">
+        <i class="ri-moon-line theme-button" id="theme-button"></i>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="burger-menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <div class="search">
+          <input id="globalSearch" placeholder="Search courses, users..." />
+        </div>
+        <div class="top-actions">
+          <button id="notifBtn">Notifications (3)</button>
+          <div class="profile">Admin ▾</div>
+        </div>
+      </header>
+
+      <section class="content" id="content">
+        <!-- Overview -->
+        <div class="page" id="overview">
+          <div class="cards">
+            <div class="card">
+              <div class="card-title">Total Students</div>
+              <div class="card-value" id="totalStudents">—</div>
+            </div>
+            <div class="card">
+              <div class="card-title">Total Courses</div>
+              <div class="card-value" id="totalCourses">—</div>
+            </div>
+            <div class="card">
+              <div class="card-title">Active Instructors</div>
+              <div class="card-value" id="totalInstructors">—</div>
+            </div>
+            <div class="card">
+              <div class="card-title">Revenue (30d)</div>
+              <div class="card-value" id="revenue">—</div>
+            </div>
+          </div>
+
+          <div class="panels">
+            <div class="panel">
+              <h3>Course Submissions</h3>
+              <table class="table" id="coursesTable">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Instructor</th>
+                    <th>Status</th>
+                    <th class="actions">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+              </table>
+            </div>
+
+            <div class="panel">
+              <h3>Recent Activity</h3>
+              <ul id="activityList" class="activity-list"></ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Courses page -->
+        <div class="page hidden" id="courses">
+          <h2>Courses</h2>
+          <div class="controls">
+            <button class="btn" id="newCourseBtn">+ New Course</button>
+            <input id="coursesFilter" placeholder="Filter by title or instructor" />
+          </div>
+          <table class="table" id="allCoursesTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Enrolled</th>
+                <th>Rating</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Instructors page -->
+        <div class="page hidden" id="instructors">
+          <h2>Instructors</h2>
+          <div class="controls">
+            <button class="btn" id="newInstructorBtn">+ New Instructor</button>
+            <input id="coursesFilter" placeholder="Filter by title or instructor" />
+          </div>
+          <table class="table" id="instructorsTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Courses</th>
+                <th>Earnings</th>
+                <th class="actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Students page -->
+        <div class="page hidden" id="students">
+          <h2>Students</h2>
+          <table class="table" id="studentsTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Password</th>
+                <th>Enrolled</th>
+                <th>Last Active</th>
+              </tr>
+            </thead>
+            <tbody>
+              
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Payments page -->
+        <div class="page hidden" id="payments">
+          <h2>Payments</h2>
+          <table class="table" id="paymentsTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>User</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Reviews page -->
+        <div class="page hidden" id="reviews">
+          <h2>Reviews</h2>
+          <div class="reviews-container">
+            <ul id="reviewsList" class="reviews-list">
+            
+            </ul>
+          </div>
+        </div>
+
+        <!-- Settings page -->
+        <div class="page hidden" id="settings">
+          <h2>Settings</h2>
+          <div class="panel">
+            <label class="setting__menu">Site name <span class="input__field"><input id="siteName" value="CourseControl" /></span></label>
+            <label class="setting__menu">Commission rate (%) <span class="input__field"><input id="commission" type="number" value="30" /></span></label>
+            <button class="btn" id="saveSettings">Save</button>
+          </div>
+        </div>
+
+      </section>
+
+      <footer class="footer">© 2025 Admin EEEE</footer>
+    </main>
+  </div>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
