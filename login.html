@@ -1,1 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login</title>
+  <link rel="stylesheet" href="login.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/3.5.0/remixicon.css">
+</head>
+
+<body class="login-page-body">
+  <div class="login__container active" id="login-container">
+    <div class="login__box">
+      <i class="ri-close-line login__close" id="login-close"></i>
+
+      <div class="login__title-box">
+        <h2 class="login__title">welcome Back</h2>
+        <div class="jelly-character">
+          <div class="jelly-face">
+            <div class="eye left-eye"><div class="pupil"></div></div>
+            <div class="eye right-eye"><div class="pupil"></div></div>
+            <div class="smile"></div>
+          </div>
+        </div>
+      </div>
+
+      <p class="login__subtitle">Enter your email and password</p>
+
+      <form class="login__form" id="loginForm">
+        <div class="login__input-box">
+          <input type="email" id="login-email" required>
+          <label>Email Address</label>
+        </div>
+
+        <div class="login__input-box password-box">
+          <input type="password" id="login-password" required>
+          <label>Password</label>
+          <i class="ri-eye-off-line toggle-password" data-target="login-password"></i>
+        </div>
+
+        <button type="submit" class="login__btn">Login</button>
+
+        <p class="login__return">
+          Don't have an account?
+          <a href="register.html">Create One</a>
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <script src="login.js"></script>
+</body>
+</html>
 
