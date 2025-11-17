@@ -7,7 +7,7 @@ import { CourseFeedback } from "../../assets/js/Modules/CourseFeedback.js"
 import { register } from "../../assets/js/Modules/userSystem.js"
 import { getCurrentUser } from "../../assets/js/Modules/userSystem.js"
 import { logout } from "../../assets/js/Modules/userSystem.js"
-
+import { ExploreSystem } from"../../assets/js/Modules/ExploreSystem.js"
 
 if(getCurrentUser() != null){
   if(getCurrentUser().role != `admin`){
@@ -48,18 +48,19 @@ $(`.profile`).innerHTML = `${getCurrentUser().name}`
 
 
 
-
+let searchBar = $('#globalSearch');
 synchronization_render()
 
 function renderAdminPage(){
-  $('#totalStudents').textContent = state.students
-  $('#totalCourses').textContent = state.courses.length
-  $('#totalInstructors').textContent = state.instructors.length
-  $('#revenue').textContent = (state.courses.reduce((s,c)=> s + (c.enrolled*9.99),0)).toFixed(2) + ` ` +'LE'
+  let query = searchBar.value;
+  $('#totalStudents').textContent = state.students;
+  $('#totalCourses').textContent = state.courses.length;
+  $('#totalInstructors').textContent = state.instructors.length;
+  $('#revenue').textContent = (state.courses.reduce((s,c)=> s + (c.enrolled*9.99),0)).toFixed(2) + ` ` +'LE';
 
   // render recent courses
-  const tbody = $('#coursesTable tbody')
-  tbody.innerHTML = ''
+  const tbody = $('#coursesTable tbody');
+  tbody.innerHTML = '';
   state.courses.forEach(c => {
     const tr = document.createElement('tr')
     
@@ -72,13 +73,14 @@ function renderAdminPage(){
         <button class="view-btn btn" data-id="${c.id}">View</button>
       </td>
     `
-    tbody.appendChild(tr)
+    tbody.appendChild(tr);
   })
 
   // render courses in courses tab
   const coursesbody = $('#allCoursesTable tbody')
   coursesbody.innerHTML = ''
-  state.courses.forEach(c => {
+  let courses = ExploreSystem.searchCourses(state.courses, query); // Search function here later
+  courses.forEach(c => {
     const tr = document.createElement('tr')
     tr.innerHTML = `
       <td>${c.id}</td>
@@ -96,7 +98,8 @@ function renderAdminPage(){
   // render instructors in instructors tab
   const instructorsbody = $('#instructorsTable tbody')
   instructorsbody.innerHTML = ''
-  state.instructors.forEach(instructor => {
+  let instructors = ExploreSystem.searchInstructor(state.instructors, query);
+  instructors.forEach(instructor => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>
@@ -126,7 +129,8 @@ function renderAdminPage(){
   // render students in students tab
   const studentsBody = $('#studentsTable tbody')
   studentsBody.innerHTML = ''
-  state.users.filter((v) => v.role == `student`).forEach(user => {
+  let students = ExploreSystem.searchStudents(state.users, query);
+  students.filter((v) => v.role == `student`).forEach(user => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${user.id}</td>
@@ -174,6 +178,10 @@ function renderAdminPage(){
 }
 
 
+searchBar.addEventListener('input', function() {
+    renderAdminPage()
+  }
+)
 
 
 /* Burger Menu & Choices */

@@ -1,3 +1,5 @@
+import { courseList } from "./Modules/courseSystem.js"
+import { ExploreSystem } from "./Modules/ExploreSystem.js";
 
 const searchInput = document.querySelector(".search-bar input");
 const allCourses = [
@@ -23,13 +25,11 @@ suggestionBox.style.zIndex = "999";
 suggestionBox.style.display = "none";
 searchBar.appendChild(suggestionBox);
 
-function normalizeText(text) {
-    return text.toLowerCase().normalize("NFD").replace(/[\u064B-\u065F]/g, "").trim();
-}
-
 searchInput.addEventListener("input", () => {
-    const query = normalizeText(searchInput.value);
+    const query = searchInput.value;
     suggestionBox.innerHTML = "";
+    console.log(query);
+    console.log("Event Activated");
 
     if (!query) {
         suggestionBox.style.display = "none";
@@ -37,18 +37,13 @@ searchInput.addEventListener("input", () => {
         return;
     }
 
-    const matched = allCourses.filter(course => {
-        const titleEl = course.querySelector("h3");
-        if (!titleEl) return false;
-        return normalizeText(titleEl.textContent).includes(query);
-    });
+    const matched = ExploreSystem.searchCourses(courseList.filter(course => course.status === "Approved"), query);
+
 
     if (matched.length) {
         matched.forEach(course => {
-            const titleEl = course.querySelector("h3");
-            const imgEl = course.querySelector("img");
-            const title = titleEl.textContent;
-            const imgSrc = imgEl ? imgEl.src : "";
+            const title = course.title;
+            const imgSrc = "assets/img/aaa.png";
 
             const item = document.createElement("div");
             item.style.display = "flex";
@@ -62,12 +57,7 @@ searchInput.addEventListener("input", () => {
             item.addEventListener("mouseout", () => item.style.background = "transparent");
 
             item.addEventListener("click", () => {
-                searchInput.value = title;
-                suggestionBox.style.display = "none";
-                allCourses.forEach(c => {
-                    const t = c.querySelector("h3")?.textContent;
-                    c.style.display = (t === title) ? "block" : "none";
-                });
+                window.location.href = `coursepage.html?id=${course.id}`;
             });
 
             suggestionBox.appendChild(item);
@@ -75,7 +65,7 @@ searchInput.addEventListener("input", () => {
         suggestionBox.style.display = "block";
     } else {
         suggestionBox.style.display = "none";
-        allCourses.forEach(c => c.style.display = "none");
+        // allCourses.forEach(c => c.style.display = "none");
     }
 });
 

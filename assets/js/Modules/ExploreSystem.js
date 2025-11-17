@@ -70,8 +70,33 @@ export const ExploreSystem = {
     const lower = keyword.toLowerCase();
     return courses.filter(c =>
       c.title.toLowerCase().includes(lower) ||
-      c.description.toLowerCase().includes(lower) ||
-      c.tags.some(tag => tag.toLowerCase().includes(lower))
+      c.description.toLowerCase().includes(lower)
+    );
+  },
+
+  /**
+   * Searches instructors by keyword in name.
+   * @param {Instructors[]} instructors
+   * @param {string} keyword 
+   * @returns {Course[]}
+   */
+  searchInstructor(instructors, keyword) {
+    const lower = keyword.toLowerCase();
+    return instructors.filter(c =>
+      c.name.toLowerCase().includes(lower) && c.role === "admin"
+    );
+  },
+
+  /**
+   * Searches Students by keyword in name.
+   * @param {Instructors[]} instructors
+   * @param {string} keyword 
+   * @returns {Course[]}
+   */
+  searchStudents(students, keyword) {
+    const lower = keyword.toLowerCase();
+    return students.filter(c =>
+      c.name.toLowerCase().includes(lower) && c.role === "student"
     );
   },
 
