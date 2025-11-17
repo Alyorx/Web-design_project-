@@ -114,24 +114,24 @@
                     <select id="categoryFilter">
                         <option value="all">All Categories</option>
                         <option value="Web Development">Web Development</option>
-                        <option value="design">Design</option>
-                        <option value="ai">Artificial Intelligence</option>
-                        <option value="cyber">CyberSecurity</option>
+                        <option value="Design">Design</option>
+                        <option value="AI">Artificial Intelligence</option>
+                        <option value="Cyber">CyberSecurity</option>
                     </select>
 
                     <select id="priceFilter">
                         <option value="all">All Prices</option>
-                        <option value="Free">Free</option>
-                        <option value="under50">$0 -> $50</option>
-                        <option value="under100">$50 -> $100</option>
-                        <option value="premium">$100+</option>
+                        <option value="u0">Free</option>
+                        <option value="u50">Under $50</option>
+                        <option value="u100">Under $100</option>
+                        <option value="g100">Greater than $100</option>
                     </select>
 
                     <select id="durationFilter">
                         <option value="all">All Durations</option>
-                        <option value="short">0 -> 5 hours</option>
-                        <option value="medium">5 -> 15 hours</option>
-                        <option value="long">15+ hours</option>
+                        <option value="short">Under 2 weeks</option>
+                        <option value="medium">Under 2 months</option>
+                        <option value="long">More than 2 months</option>
                     </select>
 
                     <button id="applyFilter">Apply</button>
@@ -276,7 +276,6 @@
                 </div>
     
                 <button type="submit" class="login__btn" id="login--button">Login</button>
-                <button type="reset" class="logout__btn" id="logout-button">Logout</button>
     
                 <p class="login__register">
                     Don't have an account? <a href="register.html">Register</a>
@@ -285,10 +284,23 @@
         </div>
     </div>
 
+     <!-- ========== Profile Popup ========== -->
+    <div class="profile__container" id="profile-container">
+        <div class="profile__box">
+            <i class="ri-close-line profile__close" id="profile-close"></i>
+            <h2 class="profile__title">Welcome Back</h2>
+            <p class="profile__subtitle">Continue your learning journey</p>
+
+            <button class="admin__btn" id="admin--button">Admin Dashboard</button>
+            <button class="logout__btn" id="logout-button">Logout</button>
+        </div>
+    </div>
+
     <!-- ========== Script ========== -->
     <script src="assets/js/main.js" type="module"></script>
-    <script src="assets/js/indexlogin.js" type="module"></script>
+    <script src="assets/js/indexPopup.js" type="module"></script>
     <script src="assets/js/theme.js"></script>
+    <script src="assets/js/search.js" type="module"></script>
     <script src="assets/js/swiper-bundle.min.js"></script>
     <script src="assets/js/courses.js" type="module"></script>
     <script src="assets/js/filter.js" type="module"></script>

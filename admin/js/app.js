@@ -1,14 +1,13 @@
 import { courseList, createCourse } from "../../assets/js/Modules/courseSystem.js"
 import { deleteCourse } from "../../assets/js/Modules/courseSystem.js"
 import { courseList as Courses } from "../../assets/js/Modules/courseSystem.js"
+import { editCourse } from "../../assets/js/Modules/courseSystem.js"
 import { listUsers } from "../../assets/js/Modules/userSystem.js"
 import { CourseFeedback } from "../../assets/js/Modules/CourseFeedback.js"
 import { register } from "../../assets/js/Modules/userSystem.js"
 import { getCurrentUser } from "../../assets/js/Modules/userSystem.js"
 import { logout } from "../../assets/js/Modules/userSystem.js"
 
-
-console.log(CourseFeedback.addFeedback(1, "104", "haha", 2.1))
 
 if(getCurrentUser() != null){
   if(getCurrentUser().role != `admin`){
@@ -23,7 +22,7 @@ if(getCurrentUser() != null){
 const state = {
   students: 0,
   courses : Courses,
-  instructors: [],
+  instructors : [],
   users: listUsers(),
   activities: [],
   payments: [],
@@ -32,6 +31,8 @@ const state = {
 
 
 let admins = (state.users.filter((v) => v.role == `admin`))
+
+state.instructors = (state.users.filter((v) => v.role == `admin`))
 
 state.students = (state.users.length) - (admins.length)
 
@@ -47,6 +48,8 @@ $(`.profile`).innerHTML = `${getCurrentUser().name}`
 
 
 
+
+synchronization_render()
 
 function renderAdminPage(){
   $('#totalStudents').textContent = state.students
@@ -81,6 +84,7 @@ function renderAdminPage(){
       <td>${c.id}</td>
       <td>${c.title}</td>
       <td>${c.category}</td>
+      <td>${c.price}$</td>
       <td>${c.enrolled}</td>
       <td>${CourseFeedback.getAverageRating(c.id)}</td>
       <td class="status status-${c.status.toLowerCase()}">${c.status}</td>
@@ -140,7 +144,6 @@ function renderAdminPage(){
 
   state.courses.forEach(c => {
     const feedbacks = CourseFeedback.getFeedback(c.id);
-    
     const courseTitle = document.createElement('li');
     courseTitle.innerHTML = `<strong>${c.title}</strong>`;
     reviewsList.appendChild(courseTitle);
@@ -209,10 +212,11 @@ $$('.nav-item[data-section]').forEach(item => {
 
 /* Courses */
 
-function addNewCourse(title, instructorName, category, description) {
+function addNewCourse(title, instructorName, category,price, duration, description) {
 
   // Generate new ID (highest existing ID + 1)
   const newId = Math.max(...state.courses.map(c => c.id), 0) + 1;
+  newId.toString();
 
 
   const newCourse = {
@@ -220,8 +224,10 @@ function addNewCourse(title, instructorName, category, description) {
     title: title,
     instructor: instructorName,
     category: category,
+    price: price,
     enrolled: 0,
     status: 'Pending',
+    duration: duration,
     description: description
   };
 
@@ -262,7 +268,23 @@ function AddCourseModal() {
         
         <div class="form-group">
           <label for="courseCategory">Category:</label>
-          <input type="text" id="courseCategory" required>
+          <select id="courseCategory" required>
+              <option value="">Select a category</option>
+              <option value="Web Development">Web Development</option>
+              <option value="Design">Design</option>
+              <option value="AI">Artificial Intelligence</option>
+              <option value="Cyber">CyberSecurity</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="coursePrice">Price (in USD):</label>
+          <input type="number" id="coursePrice" placeholder="$$$" required>
+        </div>
+
+        <div class="form-group">
+          <label for="courseDuration">Duration (in Weeks):</label>
+          <input type="number" id="courseDuration" placeholder="Weeks" required>
         </div>
 
         <div class="form-group">
@@ -290,14 +312,15 @@ function AddCourseModal() {
     const title = document.getElementById('courseTitle').value;
     const instructor = document.getElementById('courseInstructor').value;
 
-    // NEEDS REVIEW!!!
     const category = document.getElementById('courseCategory').value;
-    // NEEDS REVIEW!!!
+
+    const price = document.getElementById('coursePrice').value;
+    const duration = document.getElementById('courseDuration').value;
 
     const description = document.getElementById('courseDescription').value;
     
-    if (title && instructor && category && description) {
-      addNewCourse(title, instructor, category, description);
+    if (title && instructor && category && price && duration && description) {
+      addNewCourse(title, instructor, category, price,duration, description);
       document.body.removeChild(modal);
     }
   });
@@ -334,7 +357,6 @@ document.addEventListener('click', (e) => {
 
 // Remove Function (Reviews)
 function removeSpecificReview(courseId, userID) {
-  
   if (confirm('Are you sure you want to remove this review?')) {
    
     CourseFeedback.deleteFeedback(courseId, userID)
@@ -346,10 +368,9 @@ function removeSpecificReview(courseId, userID) {
 document.addEventListener('click', (e) => {
   if (e.target.classList.contains('remove-review-btn')) {
     
-    const courseId = parseInt(e.target.getAttribute('data-id'));
-    const userid = (e.target.getAttribute('data-userid'));
-    
-    removeSpecificReview(courseId, userid);
+    const courseId = (e.target.getAttribute('data-id'));
+    const userId = (e.target.getAttribute('data-userid'));
+    removeSpecificReview(+courseId, userId);
   }
 });
 
@@ -410,6 +431,7 @@ document.addEventListener('click', (e) => {
     
     if (course) {
       course.status = "Approved";
+      editCourse(courseId, course)
       synchronization_render()
     }
   }
