@@ -52,9 +52,18 @@ searchInput.addEventListener("input", () => {
             item.style.cursor = "pointer";
             item.style.transition = "background 0.2s";
             item.innerHTML = `<img src="${imgSrc}" style="width:40px;height:40px;object-fit:cover;border-radius:6px;margin-right:10px;"> <span>${title}</span>`;
-
-            item.addEventListener("mouseover", () => item.style.background = "#f0f0f0");
+            
+            item.addEventListener("mouseover", () => item.style.background = "#ffd166");
             item.addEventListener("mouseout", () => item.style.background = "transparent");
+            if(document.querySelector(`body`).classList.contains(`dark-theme`)){
+                item.style.color = `white`;
+                item.style.backgroundColor = `#1e293b`;
+                item.addEventListener("mouseover", () => item.style.color = "black")
+                item.addEventListener("mouseout", () => {
+                    item.style.background = "#1e293b";
+                    item.style.color = "white";
+                });
+            }
 
             item.addEventListener("click", () => {
                 window.location.href = `coursepage.html?id=${course.id}`;

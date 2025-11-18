@@ -51,26 +51,20 @@ body {
     flex-wrap: wrap;
 }
 
-.logo {
-    font-weight: 700;
-    font-size: 1.3rem;
-    color: #4f46e5;
-}
-
 .nav__logo img {
-    width: 25px;
+    width: 230px;
     height: auto;
     margin-right: 0.5rem;
     display: flex;
     align-items: center;
 }
 
+
 /* ========== Navigation Menu =======================*/
 .nav__menu {
     flex: 1;
     display: flex;
     justify-content: center;
-    margin-left: 12rem;
 }
 
 .nav__list {
@@ -1971,6 +1965,7 @@ body.dark-theme .logo {
     color: #6366f1;
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
+
 
 body.dark-theme .nav__actions i {
     color: #cbd5e1;

@@ -77,12 +77,20 @@ export const CourseFeedback = {
       return false;
     }
 
+    
     // Add new feedback
-    feedbackEntry.feedbacks.push({ 
-      userId, 
-      comment: comment.trim(), 
-      stars: Number(stars.toFixed(1)) 
-    });
+    if (comment === null){
+      feedbackEntry.feedbacks.push({ 
+        userId, 
+        stars: Number(stars.toFixed(1)) 
+      });
+    }else{
+      feedbackEntry.feedbacks.push({ 
+        userId, 
+        comment: comment.trim(), 
+        stars: Number(stars.toFixed(1)) 
+      });
+    }
     saveFeedbackData(feedbackData);
     
     return true;
@@ -108,10 +116,12 @@ export const CourseFeedback = {
   // Change the totalstars (map it into a new arr + get the average rating of all valid)
   getAverageRating(courseId) {
     const feedbacks = this.getFeedback(courseId);
-    if (feedbacks.length === 0) return 0;
+    const validFeedbacks = feedbacks.filter(f => f.stars > 0 && f.stars <= 5);
+  
+    if (validFeedbacks.length === 0) return 0;
 
-    const totalStars = feedbacks.reduce((sum, f) => sum + f.stars, 0);
-    return Number((totalStars / feedbacks.length).toFixed(1));
+    const totalStars = validFeedbacks.reduce((sum, f) => sum + f.stars, 0);
+    return Number((totalStars / validFeedbacks.length).toFixed(1));
   },
 
   /**
@@ -133,7 +143,7 @@ export const CourseFeedback = {
    */
   updateFeedback(courseId, userId, comment, stars) {
     const feedbackData = initializeFeedbackData();
-    const feedbackEntry = feedbackData.findIndex(f => f.courseId === courseId);
+    const feedbackEntry = feedbackData.find(f => f.courseId === courseId);
     
     if (!feedbackEntry) {
       return false;

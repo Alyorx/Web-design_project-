@@ -34,6 +34,44 @@ body {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
+.password-rules {
+  display: none;
+  margin-top: 8px;
+  padding-left: 5px;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  transition: all 0.3s ease;
+}
+
+.password-rules .rule {
+  color: #d00;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.3s;
+}
+
+.password-rules .rule.valid {
+  color: #0a0;
+}
+
+.password-rules .rule::before {
+  content: "✖";
+  color: inherit;
+  font-size: 0.9rem;
+}
+
+.password-rules .rule.valid::before {
+  content: "✔";
+}
+
+
+.errorDiv ul li::before{
+  content: '\f192';
+  font-family: fontAwesome;
+  gap: 8px;
+}
+
 /* Close Icon */
 .register__close {
   position: absolute;
@@ -250,5 +288,16 @@ body {
   .register__box {
     width: 95%;
     padding: 2rem 1.5rem;
+  }
+}
+
+
+
+@keyframes validationz {
+  0%{
+    opacity: 0;
+  }
+  100%{
+    opacity: 1;
   }
 }

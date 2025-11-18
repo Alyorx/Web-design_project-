@@ -47,6 +47,17 @@ body {
   color: var(--accent);
 }
 
+.sidebar-footer a{
+  color: #fff;
+  text-decoration: none;
+}
+
+.sidebar-footer a:hover{
+  color: grey;
+  text-decoration: none;
+}
+
+
 .nav {
   display: flex;
   flex-direction: column;

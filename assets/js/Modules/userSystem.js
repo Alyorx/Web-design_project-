@@ -11,8 +11,7 @@ if (!users || users.length === 0) {
   users = [
     { id: 1, name: "Beshnack", email: "Beshbesh@test.com", password: "1234", role: "admin" },
     { id: 2, name: "Mazen", email: "Mazenhany@test.com", password: "12345", role: "admin" },
-    { id: 3, name: "Jana", email: "jana@teste.com", password: "1234", role: "student" },
-    { id: 4, name: "Jana", email: "jana@test.com", password: "1234", role: "student" }
+    { id: 3, name: "Eltony", email: "gigachad@teste.com", password: "1234", role: "admin" },
   ];
   saveUsers(); // save immediately to storage
 }
@@ -51,7 +50,12 @@ export function register(userData) {
     return { ok: false, error: "Email already exists" };
   }
   const id = users.length ? Math.max(...users.map(u => u.id)) + 1 : 1;
-  const newUser = { id, name: userData.name, email: userData.email, password: userData.password, role: userData.role || "student" };
+  const newUser = { id, name: userData.name,
+    email: userData.email,
+    password: userData.password,
+    role: userData.role || "student",
+    enrolledCourses: []
+ };
   users.push(newUser);
   saveUsers();
   console.log(`%c✅ User registered: ${newUser.name} (${newUser.email})`, "color:green; font-weight:bold;");

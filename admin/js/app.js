@@ -158,14 +158,15 @@ function renderAdminPage(){
       feedbacks.forEach(f => {
         const reviewLi = document.createElement('li');
         reviewLi.innerHTML = `<strong>${f.userId}</strong>: "${f.comment}", ${f.stars}/5 stars
-        <span><button class="remove-review-btn btn danger" data-id="${c.id}" data-userid="${f.userId}">Remove</button></span>`;
+        <span><button class="remove-review-btn btn danger" data-id="${c.id}" data-userid="${f.userId}">Remove</button></span>
+        <br><br>`;
         reviewsUl.appendChild(reviewLi);
       });
       
       reviewsList.appendChild(reviewsUl);
     } else {
       const noReviewsLi = document.createElement('li');
-      noReviewsLi.innerHTML = '<em>No reviews yet</em>';
+      noReviewsLi.innerHTML = `<em>No reviews yet</em> <br><br>`;
       reviewsList.appendChild(noReviewsLi);
     }
   });

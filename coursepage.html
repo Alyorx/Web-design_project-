@@ -6,8 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Course Page</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/3.5.0/remixicon.css">
-    <link rel="shortcut icon" href="assets/img/online-learning.png" type="image/x-icon">
-
+    <link rel="icon" href="assets/img/favicon/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="assets/img/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="assets/img/favicon/favicon-96x96.png">
+    <link rel="manifest" href="assets/img/favicon/site.webmanifest">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -21,9 +23,8 @@
         <nav class="nav container">
             <!-- Logo -->
             <div class="nav__logo">
-                <img src="assets/img/online-learning.png" alt="Logo" class="nav__logo-img" />
+                <img src="assets/img/logo.png" alt="Logo" class="nav__logo-img" />
             </div>
-            <div class="logo">UpSkill</div>
 
             <!-- Navigation Menu -->
             <div class="nav__menu" id="nav-menu">
@@ -60,7 +61,7 @@
                 <button><i class="ri-search-line"></i></button>
             </div>
             <div class="nav__actions">
-                <i class="ri-user-line login-button" id="login-button" title="Login"></i>
+                <i class="ri-user-line login-button" id="login-button" title="Profile"></i>
                 <i class="ri-notification-line" id="notification-button" title="Notifications"></i>
                 <i class="ri-moon-line theme-button" id="theme-button" title="Toggle Theme"></i>
                 <i class="ri-global-line" id="language-button" title="Change Language"></i>
@@ -83,11 +84,11 @@
             <div class="course-info">
                 <div class="rating">
                     <h3>Rate this video:</h3>
-                    <span class="ri-star-fill"></span>
-                    <span class="ri-star-fill"></span>
-                    <span class="ri-star-fill"></span>
-                    <span class="ri-star-fill"></span>
-                    <span class="ri-star-half-line"></span>
+                    <span class="ri-star-line"></span>
+                    <span class="ri-star-line"></span>
+                    <span class="ri-star-line"></span>
+                    <span class="ri-star-line"></span>
+                    <span class="ri-star-line"></span>
                 </div>
 
                 <!-- Comments--->
@@ -115,6 +116,47 @@
             </ul>
         </aside>
     </main>
+
+    
+    <!-- ========== Login Popup ========== -->
+    <div class="login__container" id="login-container">
+        <div class="login__box">
+            <i class="ri-close-line login__close" id="login-close"></i>
+            <h2 class="login__title">Welcome Back</h2>
+            <p class="login__subtitle">Login to continue your learning journey</p>
+    
+            <form class="login__form">
+                <div class="login__input-box">
+                    <input type="email" id="popupemail" required>
+                    <label>Email</label>
+                </div>
+    
+                <div class="login__input-box">
+                    <input type="password" id="popuppassword" required>
+                    <label>Password</label>
+                </div>
+    
+                <button type="submit" class="login__btn" id="login--button">Login</button>
+    
+                <p class="login__register">
+                    Don't have an account? <a href="register.html">Register</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+     <!-- ========== Profile Popup ========== -->
+    <div class="profile__container" id="profile-container">
+        <div class="profile__box">
+            <i class="ri-close-line profile__close" id="profile-close"></i>
+            <h2 class="profile__title">Welcome Back</h2>
+            <p class="profile__subtitle">Continue your learning journey</p>
+
+            <button class="admin__btn" id="admin--button">Admin Dashboard</button>
+            <button class="logout__btn" id="logout-button">Logout</button>
+        </div>
+    </div>
+
 
     <!-- Footer -->
     <footer class="footer">
@@ -165,6 +207,8 @@
         </div>
     </footer>
     <script src="assets/js/main.js" type="module"></script>
+    <script src="assets/js/indexPopup.js" type="module"></script>
+    <script src="assets/js/search.js" type="module"></script>
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/language.js"></script>
     <script src="assets/js/coursepage.js" type="module"></script>
