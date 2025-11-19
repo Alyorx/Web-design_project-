@@ -12,6 +12,7 @@ const ratingStars = document.querySelectorAll(".rating span");
 const comments = document.querySelector(".comment-list"); // Message to Tony -- Handle this with courseFeedback System
 const submit = document.querySelector("#postComment");
 const links = document.querySelectorAll(".course-sidebar a");
+const starHolder = document.querySelector("#starHolder")
 let selectedRating = -1; //indexing starts at 0 duhhh so must be -1
 
 
@@ -97,7 +98,7 @@ submit.addEventListener("click" ,(e) => {
 
 ratingStars.forEach((star, i) => {
 
-  star.addEventListener("mouseover", () => {
+  star.addEventListener("mouseenter", () => {
     ratingStars.forEach((s, index) => {
       s.classList.toggle("ri-star-fill", index <= i);
       s.classList.toggle("ri-star-line", index > i);
@@ -105,11 +106,10 @@ ratingStars.forEach((star, i) => {
     });
   });
 
-  star.addEventListener("mouseout", () => {
+  starHolder.addEventListener("mouseleave", () => {
     ratingStars.forEach((s, index) => {
       s.classList.toggle("ri-star-fill", index <= selectedRating); //should be selectedRating so it doesn't reset to 0 on mouse out
       s.classList.toggle("ri-star-line", index > selectedRating);
-      console.log("amout", selectedRating+1)
     });
   });
 

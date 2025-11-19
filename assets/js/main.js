@@ -1,4 +1,5 @@
 import { Feedback } from "./Modules/Feedback.js";
+import { getCurrentUser } from "./Modules/userSystem.js";
 
 //Submit feedback
 
@@ -13,6 +14,22 @@ formy.addEventListener("submit", function(e){
     Feedback.submitFeedback(e, data)
     window.location.reload();
 })
+
+
+// Shortcut (For Admins!)
+const keys = {};
+
+if(getCurrentUser() != null){
+  if(getCurrentUser().role == `admin`){
+    document.addEventListener("keydown",(e) =>{
+        keys[e.key.toLowerCase()] = true;
+        if (keys["control"] && keys["alt"] && keys["a"]) {
+            window.location.href=`admin/index.html`;
+        }
+    });
+  }
+}
+
 
 
 

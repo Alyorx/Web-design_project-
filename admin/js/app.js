@@ -17,6 +17,16 @@ if(getCurrentUser() != null){
   window.location.href=`../errorpage.html`
 }
 
+// Shortcut to homepage. 
+const keys = {};
+
+document.addEventListener("keydown",(e) =>{
+    keys[e.key.toLowerCase()] = true;
+    if (keys["control"] && keys["alt"] && keys["a"]) {
+        window.location.href=`../index.html`;
+    }
+});
+
 
 // Mock data and simple UI logic for the admin mockup
 const state = {
@@ -525,6 +535,7 @@ function AddInstructorModal() {
     
     if (name && email) {
       addNewInstructor(name, email);
+      synchronization_render()
       document.body.removeChild(modal);
     }
   });
@@ -562,10 +573,11 @@ logoutButton.addEventListener('click', () => {
 /* Synchronizations */
 
 function synchronization_render(){
+  admins = (state.users.filter((v) => v.role == `admin`));
+  state.instructors = (state.users.filter((v) => v.role == `admin`));
   syncAllInstructorCourses()
   CourseFeedback.syncWithCourseSystem()
   renderAdminPage()
-  admins = (state.users.filter((v) => v.role == `admin`))
 }
 
 

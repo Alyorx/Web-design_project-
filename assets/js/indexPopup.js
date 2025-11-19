@@ -14,9 +14,7 @@ const loginClose = document.getElementById('login-close');
 loginButton.addEventListener('click', (e) => {
     const email = document.querySelector(`#popupemail`).value;
     const password = document.querySelector(`#popuppassword`).value;
-    if (login(email, password)){
-        alert(`Login Successful.`);
-    }else{
+    if (!login(email, password)){
         alert(`Login Failed! Please try again.`)
     }
 });
@@ -50,7 +48,6 @@ const adminButton = document.querySelector(`.admin__btn`)
 
 logoutButton.addEventListener('click', () => {
     logout();
-    alert(`Logout Successful.`);
     window.location.href="login.html"
 });
 

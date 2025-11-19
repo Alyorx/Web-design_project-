@@ -3,9 +3,50 @@ import { login } from "./Modules/userSystem.js"
 import { getCurrentUser } from "./Modules/userSystem.js"
 
 
+
+
+
+
+function submittingInfo(){
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value.trim();
+
+  if (!email || !password) {
+    alert('Please fill in all fields!');
+    return;
+  }
+
+  if(!login(email, password)){
+    alert(`Invalid Data! Please enter the correct email or password.`)
+    return;
+  }
+
+  if(getCurrentUser().role === `admin`){
+    window.location.href = "admin/index.html"
+    return
+  }
+  window.location.href = "index.html";
+  return
+}
+
+
+
 if(getCurrentUser() != null){
   window.location.href = `index.html`;
 }
+
+document.getElementById('login-email').addEventListener("keydown",(e) =>{
+  if(e.key === `Enter`){
+    document.getElementById('login-password').focus();
+  }
+});
+document.getElementById('login-password').addEventListener("keydown",(e) =>{
+  if(e.key === `Enter`){
+    submittingInfo();
+  }
+});
+
+
 
 
 const togglePasswordIcons = document.querySelectorAll('.toggle-password');
@@ -25,28 +66,7 @@ togglePasswordIcons.forEach(icon => {
 
 document.getElementById('loginForm').addEventListener('submit', function(e) {
   e.preventDefault();
-
-  const email = document.getElementById('login-email').value.trim();
-  const password = document.getElementById('login-password').value.trim();
-
-  if (!email || !password) {
-    alert('Please fill in all fields!');
-    return;
-  }
-
-  if(!login(email, password)){
-    alert(`Invalid Data! Please enter the correct email or password.`)
-    return;
-  }
-
-  if(getCurrentUser().role === `admin`){
-    alert(`Welcome back, Master.`)
-    window.location.href = "admin/index.html"
-    return
-  }
-  alert(`Welcome back, ${getCurrentUser().name}!`);
-  window.location.href = "index.html";
-  return
+  submittingInfo();
 });
 
 document.getElementById('login-close').addEventListener('click', () => {
