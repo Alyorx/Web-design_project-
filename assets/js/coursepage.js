@@ -26,9 +26,10 @@ function submitComment(comment){
   if(information.feedback.some((f) => f.userId === getCurrentUser().id.toString())){
     let rating = information.feedback.find((f) => f.userId === getCurrentUser().id.toString()).stars;
     let oldComment = information.feedback.find((f) => f.userId === getCurrentUser().id.toString()).comment;
-  
-    if(oldComment){
-      CourseFeedback.updateFeedback(information.id, getCurrentUser().id.toString(), oldComment, rating) ? alert("You have already done a comment.") : alert("Something went wrong.")  
+    if(!comment){
+      CourseFeedback.updateFeedback(information.id, getCurrentUser().id.toString(), oldComment, rating)
+    }else{
+      CourseFeedback.updateFeedback(information.id, getCurrentUser().id.toString(), comment, rating)
     }
   }else{
     CourseFeedback.addFeedback(information.id, getCurrentUser().id.toString(), comment, 0) ? alert("Commented Sucessfully!") : alert("Failed.")  
