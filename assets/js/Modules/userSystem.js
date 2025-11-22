@@ -1,4 +1,3 @@
-
 // User System module:
 //  register, login, logout, getRole, helpers
 const STORAGE_KEY_USERS = "cp_users_v1";
@@ -58,7 +57,7 @@ export function register(userData) {
  };
   users.push(newUser);
   saveUsers();
-  console.log(`%c✅ User registered: ${newUser.name} (${newUser.email})`, "color:green; font-weight:bold;");
+  console.log(`%c User registered: ${newUser.name} (${newUser.email})`, "color:green; font-weight:bold;");
   return { ok: true, user: newUser };
 }
 
@@ -75,7 +74,7 @@ export function login(email, password) {
 
 // Logout
 export function logout() {
-  if (!currentUser) { console.log("%c⚠ No user logged in", "color:gray;"); return; }
+  if (!currentUser) { console.log("%c No user logged in", "color:gray;"); return; }
   console.log(`%c Logged out: ${currentUser.name}`, "color:orange;");
   currentUser = null;
   saveCurrent();
@@ -101,3 +100,43 @@ export function listUsers() {
   console.log("%c Users:", "color:blue; font-weight:bold;", users);
   return users;
 }
+
+/**
+ * Updates the user data in the users array and the currentUser state
+ * @param {object} userToUpdate - The currently logged in user object (from getCurrentUser())
+ * @param {object} newData ({name: "New Name"})
+ */
+export function updateUser(userToUpdate, newData) {
+  if (!userToUpdate || !newData) {
+    return { ok: false, error: "Missing user or new data." };
+  }
+  
+  if (Object.keys(newData).length === 0) {
+      console.log("%c Update error: New data object is empty", "color:red; font-weight:bold;");
+      return { ok: false, error: "New data object is empty" };
+}
+  
+  // (users array data)
+  const userIndex = users.findIndex(u => u.id === userToUpdate.id);
+
+  if (userIndex === -1) {
+    console.log("%c Update error: User not found in array", "color:red; font-weight:bold;");
+    return { ok: false, error: "User not found." };
+  }
+
+
+  const updatedUser = {
+    ...users[userIndex],
+    ...newData
+  };
+
+  users[userIndex] = updatedUser;
+  saveUsers();
+
+  // (currentUser)
+  currentUser = { ...updatedUser }; 
+  saveCurrent();
+
+  console.log(`%c User updated: ${updatedUser.name} (${updatedUser.email})`, "color:green; font-weight:bold;");
+
+  return { ok: true, user: currentUser } };
