@@ -1,5 +1,4 @@
-
-// Course System module:
+  // Course System module:
 //  createCourse, editCourse, deleteCourse, getCourse, listCourses, getAnalytics, enrollUser, searchCoursesByCategory, incrementVisits
 
 const STORAGE_KEY_COURSES = "cp_courses_v1";
@@ -41,27 +40,41 @@ function _findCourseIndex(id) {
   return courseList.findIndex(c => c.id === id);
 }
 
-// Create new course
+// NEW Helper Function: Generates the next available unique ID 
+function _generateUniqueCourseId() {
+  if (courseList.length === 0) {
+    return 1;
+  }
+  // Find the max ID currently in the list and add 1
+  const maxId = Math.max(...courseList.map(c => c.id));
+  return maxId + 1;
+}
+
+// Create new course (MODIFIED)
 export function createCourse(course) {
-  if (!course || !course.id || !course.title) {
-    console.log("%c❌ createCourse: course must have id and title", "color:red;");
+  // Removed the check for course.id in the incoming data
+  if (!course || !course.title) {
+    console.log("%c❌ createCourse: course must have a title", "color:red;");
     return null;
   }
-  if (courseList.find(c => c.id === course.id)) {
-    console.log("%c❌ createCourse: course id already exists", "color:red;");
-    return null;
-  }
-  courseList.push({
+  
+  // No longer checking for existing ID, since we generate a unique one
+  const newId = _generateUniqueCourseId(); 
+
+  const newCourse = {
     ...course,
+    id: newId, // Use the newly generated ID
     students: course.students || [],
-    categories: course.categories || [], // changed
+    categories: course.categories || [],
     visits: course.visits || 0,
     price: course.price || 0,
     duration: course.duration || "N/A"
-  });
+  };
+  
+  courseList.push(newCourse);
   saveCourses();
-  console.log(`%c✅ Course created: ${course.title} (id:${course.id})`, "color:green; font-weight:bold;");
-  return course;
+  console.log(`%c✅ Course created: ${newCourse.title} (id:${newId})`, "color:green; font-weight:bold;");
+  return newCourse;
 }
 
 // Edit course
@@ -146,11 +159,11 @@ export function enrollUser(userId, courseId) {
     return false;
   }
   c.students = c.students || [];
-  if (c.students.includes(userId)) {
-    console.log("%c⚠ User already enrolled", "color:gray;");
+  if (c.students.some(s => s[0] === userId)) { // Changed check to handle the array structure [userId, date]
+    console.log("%c User already enrolled", "color:gray;");
     return false;
   }
-  c.students.push([userId, new Date()]);
+  c.students.push([userId, new Date().toISOString()]); // Added ISOString for better format
   saveCourses();
   console.log(`%c✅ User ${userId} enrolled to course ${courseId}`, "color:green;");
   return true;
@@ -160,4 +173,11 @@ export function enrollUser(userId, courseId) {
 export function searchCoursesByCategory(category) {
   if (!category || typeof category !== "string") return [];
   return courseList.filter(c => c.categories && c.categories.includes(category));
+}
+
+//  Helper for testing/cleanup 
+export function resetAllCourses() {
+    courseList = [];
+    localStorage.removeItem(STORAGE_KEY_COURSES);
+    console.log("%c All courses reset and removed from localStorage.", "color:red; font-weight:bold;");
 }
