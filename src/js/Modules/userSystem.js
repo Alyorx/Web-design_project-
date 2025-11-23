@@ -6,7 +6,7 @@ const STORAGE_KEY_CURRENT = "cp_current_user_v1";
 // Load users from LocalStorage
 let users = loadFromStorage(STORAGE_KEY_USERS);
 if (!users || users.length === 0) {
-  // Only add default user if storage is empty
+  // Only add default user if storage is empty   
   users = [
     { id: 1, name: "Beshnack", email: "Beshbesh@test.com", password: "1234", role: "admin" },
     { id: 2, name: "Mazen", email: "Mazenhany@test.com", password: "12345", role: "admin" },
@@ -105,7 +105,7 @@ export function listUsers() {
 /**
  * Updates the user data in the users array and the currentUser state
  * @param {object} userToUpdate - The currently logged in user object (from getCurrentUser())
- * @param {object} newData ({name: "New Name"})
+ * @param {object} newData - The new data fields to be merged into the user object ({name: "New Name"})
  */
 export function updateUser(userToUpdate, newData) {
   if (!userToUpdate || !newData) {
@@ -141,3 +141,32 @@ export function updateUser(userToUpdate, newData) {
   console.log(`%c User updated: ${updatedUser.name} (${updatedUser.email})`, "color:green; font-weight:bold;");
 
   return { ok: true, user: currentUser } };
+
+/**
+ * Removes a deleted course ID from the enrolledCourses array of all users
+ * @param {number} courseId  The ID of the course that was deleted
+ */
+export function cleanupUserEnrollments(courseId) {
+    let updated = false;
+
+    // Iterate over all registered users in memory
+    users.forEach(user => {
+        user.enrolledCourses = user.enrolledCourses || []; 
+        
+        const initialLength = user.enrolledCourses.length;
+        
+        // Filter the array: Create a new list that excludes the ID of the deleted course
+        user.enrolledCourses = user.enrolledCourses.filter(id => id !== courseId);
+        
+        // Check if any ID was actually removed (to avoid unnecessary saving)
+        if (user.enrolledCourses.length < initialLength) {
+            updated = true;
+        }
+    });
+
+    // If at least one ID was removed from any user, save the updated user list to storage
+    if (updated) {
+        saveUsers(); 
+        console.log(`%c Cleaned up enrollment records for course ID: ${courseId}`, "color:purple;");
+    }
+}

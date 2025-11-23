@@ -60,8 +60,8 @@ export const ExploreSystem = {
         if (key === "enrolled") {
           const userType = getCurrentUser.role !== `student`;
           switch(value){
-            case 'owned': return userType? false : getCurrentUser().enrolledCourses.includes(course.id);
-            case 'unowned': return userType? true : !(getCurrentUser().enrolledCourses.includes(course.id));
+            case 'owned': return getCurrentUser().enrolledCourses.includes(course.id);
+            case 'unowned': return !(getCurrentUser().enrolledCourses.includes(course.id));
             default: true;
           }
         }
