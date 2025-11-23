@@ -1,3 +1,5 @@
+import { getCurrentUser } from "./userSystem.js";
+
 export const ExploreSystem = {
   // Wishlist: userID → [array of courseIDs]
   wishlist: {},
@@ -55,6 +57,13 @@ export const ExploreSystem = {
         if (key === "maxPrice") return course.price <= value;
         if (key === "minDuration") return course.duration > value;
         if (key === "maxDuration") return course.duration <= value;
+        if (key === "enrolled") {
+          switch(value){
+            case 'owned': return getCurrentUser().enrolledCourses.includes(course.id);
+            case 'unowned': return !(getCurrentUser().enrolledCourses.includes(course.id));
+            default: true;
+          }
+        }
         return course[key] === value;
       });
     });

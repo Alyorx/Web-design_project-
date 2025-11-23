@@ -59,7 +59,7 @@
 
             <div class="search-bar">
                 <input type="text" placeholder="Search for a course" />
-                <button><i class="ri-search-line"></i></button>
+                <button id="searchIcon"><i class="ri-search-line"></i></button>
             </div>
             <div class="nav__actions">
                 <i class="ri-user-line login-button" id="login-button" title="Profile"></i>
@@ -108,7 +108,7 @@
         </section>
 
         <!----------------------------------Filter & Courses Section--------------------------->
-        <section class="courses-filter-section">
+        <section class="courses-filter-section" id="filter">
             <div class="filter">
                 <h3 class="filter-title">Filter Courses</h3>
                 <div class="filter-controls">
@@ -133,6 +133,12 @@
                         <option value="short">Under 2 weeks</option>
                         <option value="medium">Under 2 months</option>
                         <option value="long">More than 2 months</option>
+                    </select>
+
+                    <select id="enrollFilter">
+                        <option value="all">Enrollments</option>
+                        <option value="owned">Owned Courses</option>
+                        <option value="unowned">Unowned Courses</option>
                     </select>
 
                     <button id="applyFilter">Apply</button>

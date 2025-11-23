@@ -26,7 +26,7 @@
 
             <div class="search-bar">
                 <input type="text" placeholder="Search for a course" />
-                <button><i class="ri-search-line"></i></button>
+                <button id="searchIcon"><i class="ri-search-line"></i></button>
             </div>
             <div class="nav__actions">
                 <i class="ri-user-line login-button" id="login-button" title="Login"></i>
@@ -58,10 +58,10 @@
             <h3>💳 Payment Details</h3>
             <form id="payment-form">
                 <label>Name</label>
-                <input type="text" required placeholder="Your Full Name">
+                <input type="text" required placeholder="Your Full Name" id="formName">
 
                 <label>Email</label>
-                <input type="email" required placeholder="example@mail.com">
+                <input type="email" required placeholder="example@mail.com" id="formEmail">
 
                 <label>Payment Method</label>
                 <select required id="payment-method">
@@ -80,7 +80,7 @@
 
                 <div id="visa-box" style="display:none;">
                     <label>Card Number</label>
-                    <input type="text" id="card-number" placeholder="xxxx xxxx xxxx xxxx" maxlength="19">
+                    <input type="text" id="card-number" placeholder="xxxx xxxx xxxx xxxx" maxlength="14">
                     <label>Exp Date (MM/YY)</label>
                     <input type="text" id="exp-date" placeholder="MM/YY" maxlength="5">
                     <label>CVV</label>
@@ -89,12 +89,12 @@
 
                 <div id="paypal-box" style="display:none;">
                     <label>PayPal Email</label>
-                    <input type="email" placeholder="yourpaypal@mail.com">
+                    <input type="email" placeholder="yourpaypal@mail.com" id="paypalEmail">
                 </div>
 
                 <div id="vodafone-box" style="display:none;">
                     <label>Phone Number</label>
-                    <input type="text" placeholder="01xxxxxxxxx" maxlength="11">
+                    <input type="text" placeholder="01xxxxxxxxx" maxlength="13" id="phoneNumber">
                 </div>
 
                 <div class="btns">

@@ -7,12 +7,13 @@
 // Imports
 import { courseList } from "./Modules/courseSystem.js"
 import { ExploreSystem } from "./Modules/ExploreSystem.js";
+import { getCurrentUser } from "./Modules/userSystem.js"
 
 // References
 let courses = courseList;
 
 // Functions
-function createCourseItem({category, title, description, id}) {
+function createCourseItem({category, title, description, id, enrolled}) {
     // Create article
     const article = document.createElement("article");
     article.className = "course-item swiper-slide";
@@ -38,7 +39,7 @@ function createCourseItem({category, title, description, id}) {
     //a.href = `coursepage.html?id=${id}`; takes you to a video
     a.href = `information.html?id=${id}`
     a.className = "button";
-    a.textContent = "Enroll Now";
+    a.textContent = enrolled ? "Visit" : "Enroll Now";
 
     // Append children
     article.appendChild(img);
@@ -50,12 +51,18 @@ function createCourseItem({category, title, description, id}) {
 }
 
 function renderCourses(courses){
+    // Data
+    const user = getCurrentUser();
+    const userCourses = user.enrolledCourses
+
+    // Rendering
     for (const course of courses){
     const courseInfo = {
         category: course.category,
         title: course.title,
         description: course.description,
-        id: course.id
+        id: course.id,
+        enrolled: userCourses.includes(course.id)
     };
 
     const articleElement = createCourseItem(courseInfo);

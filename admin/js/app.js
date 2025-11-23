@@ -153,7 +153,7 @@ function renderAdminPage(){
       <td class="status status-${c.status.toLowerCase()}">${c.status}</td>
       <td>
         ${c.status !== 'Approved' ? `<button class="approve-btn btn" data-id="${c.id}">Approve</button>` : ''}
-        <button class="view-btn btn" data-id="${c.id}">View</button>
+        ${c.status == 'Approved' ? `<button class="view-btn btn" data-id="${c.id}">View</button>` : ''}
       </td>
     `
     tbody.appendChild(tr);

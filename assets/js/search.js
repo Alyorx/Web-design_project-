@@ -81,3 +81,56 @@ searchInput.addEventListener("input", () => {
 searchInput.addEventListener("blur", () => {
     setTimeout(() => suggestionBox.style.display = "none", 150);
 });
+
+searchInput.addEventListener("keydown", e => {
+    if(e.key === "Enter"){
+        let path = "index.html";
+        const query = searchInput.value.trim();
+        if (window.location.pathname === "/index.html" || window.location.pathname === "/") {
+            const section = document.querySelector("#filter");
+            if (section) {
+                section.scrollIntoView({ behavior: "smooth" });
+                return;
+            }
+        }
+    if (query) {
+                window.location.href = `index.html?search=${encodeURIComponent(query)}#filter`;
+            } else {
+                window.location.href = `index.html?#filter`;
+            }
+    }
+})
+
+searchInput.addEventListener("keydown", e => {
+    if(e.key === "Enter"){
+        const query = searchInput.value.trim();
+        if (window.location.pathname === "/index.html" || window.location.pathname === "/") {
+            const section = document.querySelector("#filter");
+            if (section) {
+                section.scrollIntoView({ behavior: "smooth" });
+                return;
+            }
+        }
+    if (query) {
+                window.location.href = `index.html?search=${encodeURIComponent(query)}#filter`;
+            } else {
+                window.location.href = `index.html?#filter`;
+            }
+    }
+})
+
+document.getElementById("searchIcon").addEventListener("click", e => {
+    const query = searchInput.value.trim();
+    if (window.location.pathname === "/index.html" || window.location.pathname === "/") {
+        const section = document.querySelector("#filter");
+        if (section) {
+            section.scrollIntoView({ behavior: "smooth" });
+            return;
+        }
+    }
+    if (query) {
+        window.location.href = `index.html?search=${encodeURIComponent(query)}#filter`;
+    } else {
+        window.location.href = `index.html?#filter`;
+    }
+})

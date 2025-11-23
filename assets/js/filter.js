@@ -1,9 +1,11 @@
 // Imports
 import { courseList } from "./Modules/courseSystem.js";
 import { ExploreSystem } from "./Modules/ExploreSystem.js";
+import { getCurrentUser } from "./Modules/userSystem.js"
 
 // References
 const paginationContainer = document.getElementById("pagination");
+const searchInput = document.querySelector(".search-bar input");
 let courses = courseList;
 
 // Pagination State
@@ -12,7 +14,7 @@ let currentPage = 1;
 let totalPages = 1;
 
 // Functions
-function createCourseFilterItem({ title, category, price, duration, id }) {
+function createCourseFilterItem({ title, category, price, duration, id, enrolled }) {
     // wrapper div
     const div = document.createElement("div");
     div.className = "course-item-filter";
@@ -44,9 +46,9 @@ function createCourseFilterItem({ title, category, price, duration, id }) {
 
     // button
     const button = document.createElement("button");
-    button.textContent = "Visit Now";
+    button.textContent = enrolled ? "Visit" : "Enroll Now";
     button.addEventListener("click", () => {
-        window.location.href = `coursepage.html?id=${id}`;
+        window.location.href = `information.html?id=${id}`;
     });
 
     // append children
@@ -61,6 +63,10 @@ function createCourseFilterItem({ title, category, price, duration, id }) {
 }
 
 function renderFilteredCourses(courseList, page, limit) {
+    // Data
+    const user = getCurrentUser();
+    const userCourses = user.enrolledCourses
+
     const approved = courseList.filter(c => c.status === "Approved");
     const paginationInfo = ExploreSystem.pagination(approved, page, limit);
 
@@ -75,7 +81,8 @@ function renderFilteredCourses(courseList, page, limit) {
             title: c.title,
             price: `${c.price}$`,
             duration: `${c.duration} Weeks`,
-            id: c.id
+            id: c.id,
+            enrolled: userCourses.includes(c.id)
         });
         container.appendChild(element);
     }
@@ -176,17 +183,18 @@ function renderPagination(filteredList = courses) {
     paginationContainer.appendChild(pag);
 }
 
+function displayCourses(query){
+    let coursesList = courseList.filter(c => c.status === "Approved"); // start with approved
 
-// Initializaiton
-renderFilteredCourses(courses, currentPage, limitPerPage);
-renderPagination(courses);
+    if (query) {
+        coursesList = ExploreSystem.searchCourses(coursesList, query); // now this is your filtered search
+    }
 
-// Events
-document.getElementById('applyFilter').addEventListener('click', () => {
     // Input
     const category = document.getElementById('categoryFilter').value;
     const price = document.getElementById('priceFilter').value;
     const duration = document.getElementById('durationFilter').value;
+    const enrollment = document.getElementById('enrollFilter').value;
 
     // Filteration
     const criteria = {};
@@ -209,10 +217,46 @@ document.getElementById('applyFilter').addEventListener('click', () => {
         }
     }
 
-    const filteredCourses = ExploreSystem.filterCourses(courses, criteria);
+    if (enrollment !== "all") criteria.enrolled = enrollment;
+    
+    const filteredCourses = ExploreSystem.filterCourses(coursesList, criteria);
 
     currentPage = 1;
-
     renderFilteredCourses(filteredCourses, currentPage, limitPerPage);
     renderPagination(filteredCourses);
+}
+
+
+function search(query){
+    if (query) {
+        const searchBar = document.querySelector("#searchBar");
+        if (searchBar) searchBar.value = query;
+
+        displayCourses(query)
+    } else {
+        displayCourses()
+    }
+}
+
+// Initializaiton
+renderFilteredCourses(courses, currentPage, limitPerPage);
+renderPagination(courses);
+
+// Events
+document.getElementById('applyFilter').addEventListener('click', () => {
+    const query = document.querySelector(".search-bar input").value;
+    displayCourses(query);
 });
+
+window.addEventListener("DOMContentLoaded", () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const query = urlParams.get("search");
+    search(query);
+});
+
+searchInput.addEventListener("keydown", e => {
+    if(e.key === "Enter"){
+        const query = searchInput.value;
+        search(query);
+    }
+})
