@@ -3,6 +3,7 @@
 
 import { courseList } from './courseSystem.js';
 
+// STORAGE KEYS 
 const STORAGE_KEY_PROGRESS = "cp_progress_v2";
 const STORAGE_KEY_CERTIFICATES = "cp_certificates_v2";
 const STORAGE_KEY_STREAKS = "cp_streaks_v2";
@@ -10,6 +11,7 @@ const STORAGE_KEY_XP = "cp_xp_v2";
 const STORAGE_KEY_EXERCISES = "cp_exercises_v2";
 const STORAGE_KEY_NOTIFICATIONS = "cp_notifications_v1"; // Key for storing notifications
 
+// IN MEMORY DATA 
 let progressList = loadProgress() || [];
 let certificates = loadCertificates() || [];
 let streaks = loadStreaks() || [];
@@ -40,7 +42,7 @@ function saveNotifications() { localStorage.setItem(STORAGE_KEY_NOTIFICATIONS, J
 
 //  Notification
 function showNotification(message, type = "info") {
-  // 1. save to list: Create and save the notification record
+  // 1. SAVE TO LIST: Create and save the persistent notification record
   const newNotification = {
     id: Date.now(), // Unique ID
     message: message,
@@ -207,7 +209,29 @@ export function listExercises(courseId, topic = null) {
 // User Progress
 export function getUserProgress(userId) { return progressList.filter(p => p.userId === userId); }
 export function listAllProgress() { return progressList; }
+/*
+* @param {number} courseId - ID
+@returns {boolean} 
+ */
+export function cleanupCourseData(courseId) {
+    let updated = false;
 
+    const initialProgressLength = progressList.length;
+    progressList = progressList.filter(p => p.courseId !== courseId);
+    if (progressList.length < initialProgressLength) {
+        saveProgress();
+        updated = true;
+    }
+ 
+    const initialCertificatesLength = certificates.length;
+    certificates = certificates.filter(c => c.courseId !== courseId);
+    if (certificates.length < initialCertificatesLength) {
+        saveCertificates();
+        updated = true;
+    }
+    
+    return updated;
+}
 //  Notification Management Functions 
 /**
  * @typedef {Object} AppNotification
@@ -237,7 +261,7 @@ export function getUnreadCount() {
 
 /**
  * Marks a specific notification or all notifications as read.
- * @param {number | null} notificationId  
+ * @param {number | null} notificationId  The ID of the notification to update, or null to update all
  */
 export function markAsRead(notificationId = null) {
   let updated = false;
@@ -248,7 +272,8 @@ export function markAsRead(notificationId = null) {
       notification.isRead = true;
       updated = true;
     }
-  } else {
+  } else {+
+
     // Mark all as read
     notificationList.forEach(n => {
       if (!n.isRead) {
