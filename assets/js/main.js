@@ -1,5 +1,6 @@
 import { Feedback } from "./Modules/Feedback.js";
 import { getCurrentUser } from "./Modules/userSystem.js";
+import { updateUser } from "./Modules/userSystem.js";
 
 //Submit feedback
 
@@ -30,7 +31,16 @@ if(getCurrentUser() != null){
   }
 }
 
-
+if (getCurrentUser().role === "student"){
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+      updateUser(getCurrentUser(), {lastActive: new Date()})
+    }
+  });
+  window.addEventListener("blur", () => {
+    updateUser(getCurrentUser(), {lastActive: new Date()})
+  });
+}
 
 
 

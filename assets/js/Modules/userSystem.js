@@ -53,7 +53,8 @@ export function register(userData) {
     email: userData.email,
     password: userData.password,
     role: userData.role || "student",
-    enrolledCourses: []
+    enrolledCourses: [],
+    lastActive: new Date()
  };
   users.push(newUser);
   saveUsers();

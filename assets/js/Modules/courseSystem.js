@@ -150,7 +150,7 @@ export function enrollUser(userId, courseId) {
     console.log("%c⚠ User already enrolled", "color:gray;");
     return false;
   }
-  c.students.push(userId);
+  c.students.push([userId, new Date()]);
   saveCourses();
   console.log(`%c✅ User ${userId} enrolled to course ${courseId}`, "color:green;");
   return true;

@@ -2,12 +2,13 @@ import { courseList, createCourse } from "../../assets/js/Modules/courseSystem.j
 import { deleteCourse } from "../../assets/js/Modules/courseSystem.js"
 import { courseList as Courses } from "../../assets/js/Modules/courseSystem.js"
 import { editCourse } from "../../assets/js/Modules/courseSystem.js"
-import { listUsers } from "../../assets/js/Modules/userSystem.js"
+import { getUser, listUsers } from "../../assets/js/Modules/userSystem.js"
 import { CourseFeedback } from "../../assets/js/Modules/CourseFeedback.js"
 import { register } from "../../assets/js/Modules/userSystem.js"
 import { getCurrentUser } from "../../assets/js/Modules/userSystem.js"
 import { logout } from "../../assets/js/Modules/userSystem.js"
 import { ExploreSystem } from"../../assets/js/Modules/ExploreSystem.js"
+import { getCourse } from "../../assets/js/Modules/courseSystem.js"
 
 if(getCurrentUser() != null){
   if(getCurrentUser().role != `admin`){
@@ -28,6 +29,27 @@ document.addEventListener("keydown",(e) =>{
 });
 
 
+
+
+// Local Storage Stuff
+
+const CommissionStorage = {
+  key: "commission",
+
+  load() {
+    const value = localStorage.getItem(this.key);
+    return value ? parseFloat(value) : 0;
+  },
+
+  save(amount) {
+    if (typeof amount !== "number") {
+      throw new Error("Commission must be a number");
+    }
+    localStorage.setItem(this.key, amount.toString());
+  },
+};
+
+
 // Mock data and simple UI logic for the admin mockup
 const state = {
   students: 0,
@@ -45,7 +67,6 @@ let admins = (state.users.filter((v) => v.role == `admin`))
 state.instructors = (state.users.filter((v) => v.role == `admin`))
 
 state.students = (state.users.length) - (admins.length)
-
 
 
 // DOM helpers
@@ -97,7 +118,7 @@ function renderAdminPage(){
       <td>${c.title}</td>
       <td>${c.category}</td>
       <td>${c.price}$</td>
-      <td>${c.enrolled}</td>
+      <td>${c.students.length}</td>
       <td>${CourseFeedback.getAverageRating(c.id)}</td>
       <td class="status status-${c.status.toLowerCase()}">${c.status}</td>
       <td><button class="remove-course-btn btn danger" data-id="${c.id}">Remove</button></td>
@@ -107,6 +128,7 @@ function renderAdminPage(){
 
   // render instructors in instructors tab
   const instructorsbody = $('#instructorsTable tbody')
+  const comm = CommissionStorage.load();
   instructorsbody.innerHTML = ''
   let instructors = ExploreSystem.searchInstructor(state.instructors, query);
   instructors.forEach(instructor => {
@@ -127,7 +149,7 @@ function renderAdminPage(){
         ).join('')}
         ${instructor.courses.length === 0 ? '<div>No courses</div>' : ''}
       </td>
-      <td>$${instructor.earnings}</td>
+      <td>${getInstructorEarnings(instructor.id, comm)} $</td>
       <td>
         <button class="btn view-instructor" data-id="${instructor.id}">View</button>
         <button class="btn contact-instructor" data-email="${instructor.email}">Contact</button>
@@ -138,18 +160,43 @@ function renderAdminPage(){
 
   // render students in students tab
   const studentsBody = $('#studentsTable tbody')
-  studentsBody.innerHTML = ''
+  studentsBody.innerHTML = '';
   let students = ExploreSystem.searchStudents(state.users, query);
   students.filter((v) => v.role == `student`).forEach(user => {
+
+    const coursesListt = user.enrolledCourses
+      .map(id => `${id} -> ${getCourse(id).title}`)
+      .join('<br>');
+      
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${user.id}</td>
       <td>${user.name}</td>
       <td>${user.email}</td>
       <td>${user.password}</td>
+      <td>${coursesListt ? coursesListt : "-"}</td>
+      <td>${makeDateLookGood(user.lastActive)}</td>
     `
     studentsBody.appendChild(tr);
   })
+
+  // render payments on payments tab
+  const paymentsList = $('#paymentsTable tbody');
+  paymentsList.innerHTML = ``;
+  state.users.filter((u) => u.enrolledCourses).forEach(user =>{
+      user.enrolledCourses.forEach(index =>{
+        const tr = document.createElement(`tr`);
+        tr.innerHTML=`
+        <td>${user.id}</td>
+        <td>${user.name}</td>
+        <td>${getCourse(index).price} $</td>
+        <td>Done</td> 
+        <td>${makeDateLookGood(getCourse(index).students.filter((d) => d[0] === user.id)[0][1])}</td>
+        `
+        paymentsList.appendChild(tr);
+    });
+  }) // About that done... lol
+  
 
 
   // render reviews on reviews tab
@@ -181,18 +228,31 @@ function renderAdminPage(){
     }
   });
 
+  // Settings
+  const commission = $(`#commission`);
+  const btn = $(`#saveSettings`);
+
+  commission.setAttribute("value", CommissionStorage.load())
+
+  btn.addEventListener("click", () => {
+    CommissionStorage.save(Number(commission.value))
+  });
+  
+}
+
+
+
 
   // activity
   const act = $('#activityList')
   act.innerHTML = ''
   state.activities.forEach(a=>{const li = document.createElement('li'); li.textContent=a; act.appendChild(li)})
-}
 
 
-searchBar.addEventListener('input', function() {
-    renderAdminPage()
-  }
-)
+  searchBar.addEventListener('input', function() {
+      renderAdminPage()
+    }
+  )
 
 
 /* Burger Menu & Choices */
@@ -334,8 +394,15 @@ function AddCourseModal() {
     const category = document.getElementById('courseCategory').value;
 
     const price = document.getElementById('coursePrice').value;
+    if (price <= 0){
+      alert("Price must be greater than 0")
+      return;
+    }
     const duration = document.getElementById('courseDuration').value;
-
+    if(duration <= 0){
+      alert("Duration must be greater than 0")
+      return;
+    }
     const description = document.getElementById('courseDescription').value;
     
     if (title && instructor && category && price && duration && description) {
@@ -425,18 +492,48 @@ function syncAllInstructorCourses() {
       id: course.id,
       title: course.title
     }));
-    //  Update earnings based on course enrollments
-    instructor.earnings = calculateInstructorEarnings(instructor.name);
   });
 }
 
-//Calculate earnings based on course enrollments
-function calculateInstructorEarnings(instructorName) {
-  const instructorCourses = state.courses.filter(course => course.instructor === instructorName);
-  return instructorCourses.reduce((total, course) => {
-    // Assuming 30% for instructor (adjust as needed in settings!!!)
-    return total + (course.enrolled * 9.99 * 0.3);
-  }, 0);
+// calculate instructor earnings
+
+function getInstructorEarnings(instructorId, commission) {
+  
+  const instructor = state.instructors.find(i => i.id === instructorId);
+  if (!instructor) return 0;
+
+  let total = 0;
+
+  instructor.courses.forEach(c => {
+    const course = getCourse(c.id);
+    const studentsCount = course.students.length;
+    const price = course.price;
+
+    total += (studentsCount * price) * (1 - commission/100);
+  });
+
+  return total;
+}
+
+function makeDateLookGood(str){
+  
+  const match = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})[T ](\d{1,2}):(\d{1,2}):(\d{1,2})/);
+  if (!match) return null;
+
+  const [
+    _,
+    y, m, d, h, min, s
+  ] = match;
+
+  return (
+    `${y}-` +
+    `${m.padStart(2, "0")}-` +
+    `${d.padStart(2, "0")} ` +
+    `${h.padStart(2, "0")}:` +
+    `${min.padStart(2, "0")}:` +
+    `${s.padStart(2, "0")}`
+  );
+
 }
 
 
@@ -451,6 +548,17 @@ document.addEventListener('click', (e) => {
     if (course) {
       course.status = "Approved";
       editCourse(courseId, course)
+      synchronization_render()
+    }
+  }
+});
+
+document.addEventListener("click", (e) =>{
+  if(e.target.classList.contains(`view-btn`)){
+    const courseId = parseInt(e.target.getAttribute('data-id'));
+    const course = courseList.find((course) => courseId === course.id);
+    if (course) {
+      window.location.href=`/Web-design_project-/information.html?id=${courseId}`
       synchronization_render()
     }
   }
@@ -549,9 +657,6 @@ function AddInstructorModal() {
 
 }
 
-
-/* Settings Page */
-
 // Logout
 
 const logoutButton = document.getElementById('logout-button');
@@ -561,11 +666,6 @@ logoutButton.addEventListener('click', () => {
     alert(`Logout Successful.`);
     window.location.href = `../login.html`
 });
-
-
-
-
-
 
 
 

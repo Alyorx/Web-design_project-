@@ -60,6 +60,11 @@ main {
     object-fit: cover;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12); 
     }
+
+.course-info strong{
+    font-size: 1.25rem;
+    color: green;
+}
 .course-details{
     min-width: 60%;
 }

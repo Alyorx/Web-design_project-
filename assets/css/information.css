@@ -42,6 +42,11 @@ body {
 }
 .btn-enroll:hover { background: #4338ca; }
 
+section{
+  margin: 0px 2rem;
+}
+
+
 .details, .learn {
     margin-top: 40px;
     background: #fff;
@@ -57,8 +62,6 @@ body {
 .detail-box h3 { color: #6c63ff; margin-bottom: 5px; }
 
 .learn h2 { color: #6c63ff; margin-bottom: 15px; }
-.learn ul { columns: 2; }
-.learn li { margin-bottom: 10px; }
 
 .rating-section {
     background: #fff;
@@ -73,6 +76,10 @@ body {
     transition: 0.2s;
 }
 .stars i.selected { color: gold; transform: scale(1.2); }
+
+.rating-section .stars{
+    color: #4338ca;
+}
 
 .comments { 
     margin-top: 40px;

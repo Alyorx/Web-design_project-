@@ -29,6 +29,11 @@ function createCourseFilterItem({ title, category, price, duration, id }) {
     const h3 = document.createElement("h3");
     h3.textContent = title;
 
+    // category
+    const pCategory = document.createElement("p");
+    pCategory.textContent = `Category: ${category}`;
+
+
     // price
     const pPrice = document.createElement("p");
     pPrice.textContent = `Price: ${price}`;
@@ -47,6 +52,7 @@ function createCourseFilterItem({ title, category, price, duration, id }) {
     // append children
     div.appendChild(img);
     div.appendChild(h3);
+    div.appendChild(pCategory);
     div.appendChild(pPrice);
     div.appendChild(pDuration);
     div.appendChild(button);

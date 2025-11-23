@@ -35,7 +35,8 @@ function createCourseItem({category, title, description, id}) {
 
     // Button
     const a = document.createElement("a");
-    a.href = `coursepage.html?id=${id}`;
+    //a.href = `coursepage.html?id=${id}`; takes you to a video
+    a.href = `information.html?id=${id}`
     a.className = "button";
     a.textContent = "Enroll Now";
 

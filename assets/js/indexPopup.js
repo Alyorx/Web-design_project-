@@ -3,6 +3,58 @@ import { logout } from "./Modules/userSystem.js";
 import { login } from "./Modules/userSystem.js";
 import { getCurrentUser } from "./Modules/userSystem.js";
 
+
+// Main stuff
+
+
+
+const mainPopup = document.createElement(`div`)
+document.body.appendChild(mainPopup);
+
+
+mainPopup.innerHTML=`
+    <!-- ========== Login Popup ========== -->
+    <div class="login__container" id="login-container">
+        <div class="login__box">
+            <i class="ri-close-line login__close" id="login-close"></i>
+            <h2 class="login__title">Welcome Back</h2>
+            <p class="login__subtitle">Login to continue your learning journey</p>
+    
+            <form class="login__form">
+                <div class="login__input-box">
+                    <input type="email" id="popupemail" required>
+                    <label>Email</label>
+                </div>
+    
+                <div class="login__input-box">
+                    <input type="password" id="popuppassword" required>
+                    <label>Password</label>
+                </div>
+    
+                <button type="submit" class="login__btn" id="login--button">Login</button>
+    
+                <p class="login__register">
+                    Don't have an account? <a href="register.html">Register</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== Profile Popup ========== -->
+    <div class="profile__container" id="profile-container">
+        <div class="profile__box">
+            <i class="ri-close-line profile__close" id="profile-close"></i>
+            <h2 class="profile__title">Welcome Back</h2>
+            <p class="profile__subtitle">Continue your learning journey</p>
+
+            <button class="admin__btn" id="admin--button">Admin Dashboard</button>
+            <button class="logout__btn" id="logout-button">Logout</button>
+        </div>
+    </div>
+`
+
+
+
 /* LOGIN/LOGOUT POPUP */
 const loginContainer = document.getElementById('login-container');
 const loginIcon = document.getElementById('login-button');
@@ -73,4 +125,5 @@ window.addEventListener('click', (e) => {
         profileContainer.classList.remove('active');
     }
 });
+
 

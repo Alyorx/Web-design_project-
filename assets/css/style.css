@@ -561,7 +561,7 @@ body {
 }
 
 .filter:hover {
-    transform: translateY(-3px);
+    box-shadow: 0 0 10px #4f46e5;
 }
 
 .filter-title {
@@ -2132,6 +2132,10 @@ body.dark-theme .courses-filter-section {
 body.dark-theme .filter {
     background: #1e293b;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-theme .filter:hover{
+    box-shadow: 0 0 10px #ffd166;
 }
 
 body.dark-theme .filter-title {

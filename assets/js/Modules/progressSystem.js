@@ -238,6 +238,7 @@ export function getUnreadCount() {
 /**
  * Marks a specific notification or all notifications as read.
  * @param {number | null} notificationId  
+ */
 export function markAsRead(notificationId = null) {
   let updated = false;
 
