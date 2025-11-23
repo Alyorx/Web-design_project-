@@ -65,7 +65,7 @@ function createCourseFilterItem({ title, category, price, duration, id, enrolled
 function renderFilteredCourses(courseList, page, limit) {
     // Data
     const user = getCurrentUser();
-    const userCourses = user.enrolledCourses
+    const userCourses = getCurrentUser().role !== `student` ? [] : user.enrolledCourses;
 
     const approved = courseList.filter(c => c.status === "Approved");
     const paginationInfo = ExploreSystem.pagination(approved, page, limit);

@@ -53,7 +53,8 @@ function createCourseItem({category, title, description, id, enrolled}) {
 function renderCourses(courses){
     // Data
     const user = getCurrentUser();
-    const userCourses = user.enrolledCourses
+    const userCourses = getCurrentUser().role !== `student` ? [] : user.enrolledCourses;
+
 
     // Rendering
     for (const course of courses){

@@ -208,7 +208,7 @@ submit.addEventListener("click" ,(e) => {
 
 enroll.addEventListener("click",() =>{
   if(getRole() === `admin`){
-    window.location.href=`purchase.html?id=${getCourseData().id}`;
+    window.location.href=`coursepage.html?id=${getCourseData().id}`;
     return
   }
   if(getCurrentUser().enrolledCourses.includes(getCourseData().id)){
