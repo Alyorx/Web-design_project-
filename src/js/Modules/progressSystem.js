@@ -272,7 +272,7 @@ export function markAsRead(notificationId = null) {
       notification.isRead = true;
       updated = true;
     }
-  } else {+
+  } else {
 
     // Mark all as read
     notificationList.forEach(n => {
