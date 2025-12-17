@@ -115,7 +115,7 @@ const deleteCourse = async (req, res) => {
     }
 
     // Delete user
-    const result = await Course.deleteOne(id);
+    const result = await Course.deleteOne({ id });
 
     if (result.deletedCount === 0) {
       return res.status(404).json({
