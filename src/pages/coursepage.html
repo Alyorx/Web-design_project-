@@ -78,11 +78,16 @@
             <h2 class="course-title">Title</h2>
             
             <div class="video-container">
-                <video controls id="video-player">
-                    <source src="../assets/video/Arrays.mp4" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
+                <iframe
+                    id="video-player"
+                    src=""
+                    title="Course video"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen>
+                </iframe>
             </div>
+
             <h4 class="course-title">Chapter</h4>
 <!--             
             <div class="course-info">
@@ -112,14 +117,9 @@
         <!-- Right Section -->
         <aside class="course-sidebar">
             <h3>Next Videos</h3>
-            <ul>
-                <li><a>Chapter 1: Arrays in Data Structure</a></li>
-                <li><a>Chapter 2: Backtracking Algorithm</a></li>
-                <li><a>Chapter 3: Heap Sort</a></li>
-                <li><a>Chapter 4: Pointers</a></li>
-                <li><a>Chapter 5: What is a Stack?</a></li>
-            </ul>
+            <ul id="videoList"></ul>
         </aside>
+
     </main>
 
 

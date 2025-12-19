@@ -574,6 +574,9 @@ function AddVideoModal() {
   modal.querySelector('#addVideoForm').addEventListener('submit', (e) => {
     e.preventDefault();
     const title = document.getElementById('videoTitle').value;
+
+
+    // Beshnack Search me
     const url = document.getElementById('videoURL').value;
 
     if (title && url) {

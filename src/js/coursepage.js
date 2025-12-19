@@ -1,8 +1,8 @@
 // Modules
-import { CourseInformation } from "./Modules/CourseInformation.js";
+import { CourseInformation, courseVideos } from "./Modules/CourseInformation.js";
+import { CourseFeedback,  } from "./Modules/CourseFeedback.js";
 import { getUser } from "./Modules/userSystem.js";
 import { getCurrentUser } from "./Modules/userSystem.js";
-import { CourseFeedback } from "./Modules/CourseFeedback.js";
 
 // References
 const videoName = document.querySelector("h2.course-title");
@@ -59,19 +59,67 @@ function loadComments(course){
 function loadVideo(index){
   let information = getCourseData();
   videoName.innerHTML = `${information.title}`
-  courseTitle.innerHTML = `${CourseInformation.courseVideos[index][1]}`;
-  video.querySelector("source").src = `${CourseInformation.videosURL}${CourseInformation.courseVideos[index][0]}`;
-  video.load();
+  let videos = CourseInformation.getVideos(String(information.id));
+  courseTitle.innerHTML = `${videos[index].videoTitle}`;
+
+  const iframe = document.getElementById("video-player");
+  iframe.src = videos[index].videoURL;
 }
 
-// Events
-links.forEach((link, i) => {
-  link.addEventListener("click", () => {
-    links.forEach(l => l.removeAttribute("id"));
-    link.id = "selected";
-    loadVideo(i);
+
+function loadSidebar() {
+  let information = getCourseData();
+  const videoList = document.getElementById("videoList");
+  videoList.innerHTML = "";
+
+  const videos = CourseInformation.getVideos(String(information.id));
+
+  if (!videos || videos.length === 0) {
+    videoList.innerHTML = "<li>No videos available</li>";
+    return;
+  }
+
+  videos.forEach((video, index) => {
+    const li = document.createElement("li");
+    const a = document.createElement("a");
+
+    a.textContent = `Chapter ${index + 1}: ${video.videoTitle}`;
+    a.href = "#";
+
+    a[0] = "selected";
+
+    a.addEventListener("click", (e) => {
+      e.preventDefault();
+
+      document
+        .querySelectorAll(".course-sidebar a")
+        .forEach(l => l.removeAttribute("id"));
+
+      a.id = "selected";
+      loadVideo(index);
+    });
+
+    li.appendChild(a);
+    videoList.appendChild(li);
+
+    // to load first element.
+    if (index === 0) {
+      a.id = "selected";
+      loadVideo(0);
+    }
   });
-});
+}
+
+
+
+// Events
+// links.forEach((link, i) => {
+//   link.addEventListener("click", () => {
+//     links.forEach(l => l.removeAttribute("id"));
+//     link.id = "selected";
+//     loadVideo(i);
+//   });
+// });
 
 /*
 submit.addEventListener("click" ,(e) => {
@@ -87,9 +135,10 @@ submit.addEventListener("click" ,(e) => {
 
 
 try{
+  loadSidebar()
   loadVideo(0);
-  links[0].id = "selected";
+  //links[0].id = "selected";
 }catch (e){
   console.log(e)
-  window.location.href="errorpage.html"
+  //window.location.href="errorpage.html"
 }
