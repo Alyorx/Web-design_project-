@@ -1,105 +1,109 @@
 import { getCourse } from "./courseSystem.js";
 import { CourseFeedback } from "./CourseFeedback.js";
-
+import { api } from './api.js';
+import { mergeItems } from "./helper.js";
 
 const STORAGE_KEY_COURSES = "cp_courses_videos";
 
+/* =========================
+   INTERNAL STATE
+========================= */
+
 export const courseVideos = loadCourseVideos() || [
   {
-    "id": "2",
-    "videos": [
+    id: "2",
+    videos: [
       {
-        "videoURL": String,
-        "videoTitle": String
+        videoURL: "",
+        videoTitle: ""
       }
     ]
   }
 ];
 
-export const CourseInformation = {
-  // videosURL: "../assets/videos/",
-  // courseVideos: [ // key: courseid, value: array of videos URL --- But since no backend i will temporary set all courses to view same vids as an array
-  //   ["Arrays.mp4", "Chapter 1: Arrays in Data Structure"],
-  //   ["Backtracking.mp4", "Chapter 2: Backtracking Algorithm"],
-  //   ["Heap.mp4", "Chapter 3: Heap Sort"],
-  //   ["Pointers.mp4", "Chapter 4: Pointers"],
-  //   ["Stack.mp4", "Chapter 5: What is a Stack?"]
-  // ],
-
-
-
-
-  getVideos(id) {
-    const course = courseVideos.find(course => course.id === id);
-    return course ? course.videos : [];
-  },
-
-  /*
-    Returns: id: String
-  */
-  getIdFromURL() {
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get("id");
-    return id;
-  },
-
-  getCourseVideoById(id) {
-    return courseVideos.find(course => course.id === id) || null;
-  },
-
-  /* Returns 
-    {
-      category: string, 
-      description: string, 
-      enrolled: number, 
-      id: number, 
-      instructor: string, 
-      status: string,
-      students: array,
-      tags: array,
-      title: string
-    }
-  */
-  courseInfo() {
-    const id = Number(this.getIdFromURL());
-    const course = getCourse(id);
-    course.feedback = CourseFeedback.getFeedback(id.toString());
-    return course;
-  }
-}
-
+/* =========================
+   STORAGE HELPERS
+========================= */
 
 function loadCourseVideos() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY_COURSES)) || []; } catch (e) { return []; }
 }
 
 function saveCourseVideos() {
-  try { localStorage.setItem(STORAGE_KEY_COURSES, JSON.stringify(courseVideos)); } catch (e) { /*ignore*/ }
+  try {
+    localStorage.setItem(STORAGE_KEY_COURSES, JSON.stringify(courseVideos));
+    // Optional backend sync
+    api.post('/courseVideos/sync', JSON.stringify(courseVideos)).catch(console.error);
+  } catch (e) {}
 }
 
+
+/* =========================
+   API FETCH & MERGE
+========================= */
+
+export async function fetchAndMergeCourseVideos(url) {
+  try {
+    const newVideos = await api.get(url);
+    if (!Array.isArray(newVideos)) throw new Error("Invalid course videos payload");
+
+    const merged = mergeItems(courseVideos, newVideos, 'id');
+    courseVideos.length = 0;
+    courseVideos.push(...merged);
+
+    saveCourseVideos();
+  } catch (e) {
+    console.error("Failed to fetch course videos:", e);
+  }
+}
+
+fetchAndMergeCourseVideos('/courseVideos/')
+
+/* =========================
+   VIDEO MANAGEMENT
+========================= */
+
 export function createVideo(id, url, title) {
+  const videoFind = courseVideos.find(course => course.id === id);
 
-  const videoFind = CourseInformation.getCourseVideoById(id);
+  const newVideo = { videoTitle: title, videoURL: url };
 
-  if(videoFind){
-    const videos = 
-      {
-        videoTitle: title,
-        videoURL: url
-      }
-    videoFind.videos.push(videos);
-  }else{
-    const newVideo = {
-      id: id,
-      videos: [
-        {
-          videoTitle: title,
-          videoURL: url
-        }
-      ]
-    };
-    courseVideos.push(newVideo);
+  if (videoFind) {
+    // Add only if video URL+title not exists
+    if (!videoFind.videos.some(v => v.videoURL === url && v.videoTitle === title)) {
+      videoFind.videos.push(newVideo);
+    }
+  } else {
+    courseVideos.push({ id, videos: [newVideo] });
   }
 
   saveCourseVideos();
 }
+
+/* =========================
+   GETTERS
+========================= */
+
+export const CourseInformation = {
+  getVideos(id) {
+    const course = courseVideos.find(course => course.id === id);
+    return course ? course.videos : [];
+  },
+
+  getIdFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("id");
+  },
+
+  getCourseVideoById(id) {
+    return courseVideos.find(course => course.id === id) || null;
+  },
+
+  courseInfo() {
+    const id = Number(this.getIdFromURL());
+    const course = getCourse(id);
+    if (!course) return null;
+    course.feedback = CourseFeedback.getFeedback(id.toString());
+    return course;
+  }
+};

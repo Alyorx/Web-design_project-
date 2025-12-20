@@ -41,7 +41,7 @@ function debounce(fn, delay) {
     }, delay);
   };
 }
-const debouncedRender = debounce(synchronization_render, 1500);
+const debouncedRender = debounce(synchronization_render, 2000);
 debouncedRender();
 
 
@@ -573,14 +573,15 @@ function AddVideoModal() {
 
   modal.querySelector('#addVideoForm').addEventListener('submit', (e) => {
     e.preventDefault();
+
     const title = document.getElementById('videoTitle').value;
 
-
     // Beshnack Search me
-    const url = document.getElementById('videoURL').value;
+    let id = document.getElementById('videoURL').value;
+    
 
-    if (title && url) {
-      addNewVideo(title, url);
+    if (title && id) {
+      addNewVideo(title, id);
       RecentActivities.push(`New Video Added. (${title})`)
       document.body.removeChild(modal);
     }
@@ -662,6 +663,7 @@ function removeSpecificCourse(courseId) {
    
     // deleteCourse(courseId);
     courseDeletion(courseId);
+    window.location.reload()
     debouncedRender()
   }
 }
@@ -737,10 +739,11 @@ function getInstructorEarnings(instructorId, commission) {
 
   let total = 0;
 
+ 
   instructor.courses.forEach(c => {
     const course = getCourse(c.id);
-    const studentsCount = course.students.length;
-    const price = course.price;
+    const studentsCount = course?.students.length || 0;
+    const price = course?.price || 0;
 
     total += (studentsCount * price) * (1 - commission/100);
   });

@@ -2,6 +2,8 @@
 // trackProgress, XP, streaks, certificates, exercises, notifications (PERSISTENT)
 
 import { courseList } from './courseSystem.js';
+import { mergeXP } from './helper.js';
+import { api } from './api.js';
 
 // STORAGE KEYS 
 const STORAGE_KEY_PROGRESS = "cp_progress_v2";
@@ -59,6 +61,17 @@ function loadXP() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY_XP)
  * Save XP to localStorage
  */
 function saveXP() { localStorage.setItem(STORAGE_KEY_XP, JSON.stringify(xpList)); }
+
+
+async function fetchAllXP() {
+  // GET ALL XP FROM SERVER
+  return api.get("/xps/");
+}
+
+async function syncAllXP(xpList) {
+  // POST ALL XP TO SERVER
+  return api.post("/xps/sync", xpList);
+}
 
 /**
  * Load exercises from localStorage
@@ -139,16 +152,27 @@ function showNotification(message, type = "info") {
  * @param {number} amount - XP amount to add
  * @returns {number|null} Updated XP or null if invalid
  */
+
 export function updateXP(userId, amount) {
-  if (typeof amount !== "number" || isNaN(amount)) return null;
-  if (amount < 0) return null;
+  if (typeof amount !== "number" || isNaN(amount) || amount < 0) return null;
 
+  const xpList = loadXP();
   let userXP = xpList.find(x => x.userId === userId);
-  if (userXP) userXP.points += amount;
-  else { userXP = { userId, points: amount }; xpList.push(userXP); }
 
-  saveXP();
-  showNotification(`🎉 You earned ${amount} XP Total: ${userXP.points}`, "success");
+  if (userXP) {
+    userXP.points += amount;
+  } else {
+    userXP = { userId, points: amount };
+    xpList.push(userXP);
+  }
+
+  saveXP(xpList);
+  window.location.reload();
+  showNotification(
+    `🎉 You earned ${amount} XP (Total: ${userXP.points})`,
+    "success"
+  );
+
   return userXP.points;
 }
 
@@ -158,7 +182,9 @@ export function updateXP(userId, amount) {
  * @returns {number}
  */
 export function getUserXP(userId) {
-  const userXP = xpList.find(x => x.userId === userId);
+  const xpList = loadXP();
+  const userXP = xpList.find(x => x.userId === String(userId));
+  print(userXP)
   return userXP ? userXP.points : 0;
 }
 
@@ -329,3 +355,28 @@ export function markAsRead(notificationId = null) {
   }
   if (updated) saveNotifications();
 }
+
+
+
+export async function syncXPSystem() {
+  const localXP = loadXP();
+
+  try {
+    const serverXP = await fetchAllXP();
+
+    const mergedXP = mergeXP(localXP, serverXP);
+
+    // Save merged locally
+    saveXP(mergedXP);
+
+    // Push merged to server
+    await syncAllXP(mergedXP);
+
+    return mergedXP;
+  } catch (err) {
+    console.error("XP sync failed:", err);
+    return localXP; // fallback
+  }
+}
+
+syncXPSystem()

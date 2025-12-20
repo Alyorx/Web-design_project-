@@ -63,7 +63,8 @@ function loadVideo(index){
   courseTitle.innerHTML = `${videos[index].videoTitle}`;
 
   const iframe = document.getElementById("video-player");
-  iframe.src = videos[index].videoURL;
+  const id = videos[index].videoURL;
+  iframe.src = `https://player.vimeo.com/video/${id}?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479`;
 }
 
 

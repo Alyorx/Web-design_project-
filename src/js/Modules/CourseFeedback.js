@@ -1,236 +1,203 @@
 import { getCourse, courseList } from "./courseSystem.js";
 import { updateXP } from "./progressSystem.js";
+import { api } from "./api.js";
+import { mergeFeedbackData } from "./helper.js";
 
-// Variables
+/* =========================
+   TYPES
+========================= */
 
 /**
  * @typedef {Object} CourseFeedback
  * @property {string} userId
- * @property {string} comment
+ * @property {string=} comment
  * @property {number} stars
  */
 
 /**
- * @typedef {Object} Course
+ * @typedef {Object} CourseFeedbackEntry
  * @property {string} courseId
  * @property {CourseFeedback[]} feedbacks
  */
 
-// localStorage key
-const STORAGE_KEY_FEEDBACK = 'courseFeedbackData';
+/* =========================
+   STORAGE
+========================= */
 
-// Initialize or load feedback data from localStorage
-const initializeFeedbackData = () => {
-  const storedData = localStorage.getItem(STORAGE_KEY_FEEDBACK);
-  if (storedData) {
-    return JSON.parse(storedData);
-  } else {
-    const emptyData = [];
-    localStorage.setItem(STORAGE_KEY_FEEDBACK, JSON.stringify(emptyData));
-    return emptyData;
+const STORAGE_KEY_FEEDBACK = "courseFeedbackData";
+
+/* =========================
+   STORAGE HELPERS
+========================= */
+
+function initializeFeedbackData() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY_FEEDBACK)) || [];
+  } catch {
+    return [];
   }
-};
+}
 
-// Save data to localStorage
-const saveFeedbackData = (data) => {
+function saveFeedbackData(data) {
   localStorage.setItem(STORAGE_KEY_FEEDBACK, JSON.stringify(data));
-};
+}
+
+
+/**
+ * Pull backend data ONCE and merge
+ */
+export async function syncFeedbackFromAPI() {
+  try {
+    const backendData = await api.get("/feedbacks");
+    if (!Array.isArray(backendData)) return;
+
+    const localData = initializeFeedbackData();
+    const merged = mergeFeedbackData(localData, backendData);
+
+    saveFeedbackData(merged);
+  } catch (e) {
+    console.error("Feedback sync failed:", e);
+  }
+}
+syncFeedbackFromAPI()
+
+/**
+ * Push local data to backend (fire-and-forget)
+ */
+function syncFeedbackToAPI(data) {
+  try {
+    api.post("/feedbacks/sync", data);
+  } catch {
+    /* ignore */
+  }
+}
+
+/* =========================
+   MAIN API (LOGIC UNCHANGED)
+========================= */
 
 export const CourseFeedback = {
-  /**
-   * Add new feedback to course
-   * @param {string} courseId
-   * @param {string} userId
-   * @param {string} comment
-   * @param {number} stars
-   * @returns {boolean}
-   */
+
   addFeedback(courseId, userId, comment, stars) {
-    // Verify course exists in course system
     const course = getCourse(Number(courseId));
-    if (!course) {
-      return false;
-    }
+    if (!course) return false;
+
+    if (stars < 0 || stars > 5) return false;
 
     const feedbackData = initializeFeedbackData();
-    let feedbackEntry = feedbackData.find(f => f.courseId === courseId);
+    let feedbackEntry = feedbackData.find(
+      f => String(f.courseId) === String(courseId)
+    );
 
     if (!feedbackEntry) {
-      // If course doesn't exist in feedback data, create it with your structure
-      feedbackEntry = { 
-        courseId: courseId,
-        feedbacks: []
-      };
+      feedbackEntry = { courseId: String(courseId), feedbacks: [] };
       feedbackData.push(feedbackEntry);
     }
 
-    // Check if user already submitted feedback so no duplicates
-    const existingFeedback = feedbackEntry.feedbacks.find(f => f.userId === userId);
-    if (existingFeedback) {
-      return false;
-    }
+    const existingFeedback = feedbackEntry.feedbacks.find(
+      f => f.userId === userId
+    );
+    if (existingFeedback) return false;
 
-    // Validate stars rating
-    if (stars < 0 || stars > 5) {
-      return false;
-    }
+    feedbackEntry.feedbacks.push({
+      userId,
+      ...(comment ? { comment: comment.trim() } : {}),
+      stars: Number(stars.toFixed(1))
+    });
 
-    
-    // Add new feedback
-    if (comment === null){
-      feedbackEntry.feedbacks.push({ 
-        userId, 
-        stars: Number(stars.toFixed(1)) 
-      });
-    }else{
-      feedbackEntry.feedbacks.push({ 
-        userId, 
-        comment: comment.trim(), 
-        stars: Number(stars.toFixed(1)) 
-      });
-    }
     saveFeedbackData(feedbackData);
+    syncFeedbackToAPI(feedbackData);
 
-   const AddFeedback_XP = 10;
-    updateXP(userId, AddFeedback_XP); 
+    updateXP(userId, 10);
     return true;
   },
 
-  /**
-   * Get all feedback for course - linked with course system
-   * @param {string} courseId
-   * @returns {Object[]}
-   */
   getFeedback(courseId) {
     const feedbackData = initializeFeedbackData();
-    const feedbackEntry = feedbackData.find(f => f.courseId == courseId);
+    const feedbackEntry = feedbackData.find(
+      f => String(f.courseId) === String(courseId)
+    );
     return feedbackEntry?.feedbacks || [];
   },
 
-  /**
-   * Calculate average rating for course
-   * @param {string} courseId
-   * @returns {number}
-   */
-
-  // Change the totalstars (map it into a new arr + get the average rating of all valid)
   getAverageRating(courseId) {
-    const feedbacks = this.getFeedback(courseId);
-    const validFeedbacks = feedbacks.filter(f => f.stars > 0 && f.stars <= 5);
-  
-    if (validFeedbacks.length === 0) return 0;
+    const feedbacks = this.getFeedback(courseId)
+      .filter(f => f.stars > 0 && f.stars <= 5);
 
-    const totalStars = validFeedbacks.reduce((sum, f) => sum + f.stars, 0);
-    return Number((totalStars / validFeedbacks.length).toFixed(1));
+    if (!feedbacks.length) return 0;
+
+    const totalStars = feedbacks.reduce((sum, f) => sum + f.stars, 0);
+    return Number((totalStars / feedbacks.length).toFixed(1));
   },
 
-  /**
-   * Get feedback count for a course
-   * @param {string} courseId
-   * @returns {number}
-   */
   getFeedbackCount(courseId) {
     return this.getFeedback(courseId).length;
   },
 
-  /**
-   * Update existing feedback, probably important
-   * @param {string} courseId
-   * @param {string} userId
-   * @param {string} comment
-   * @param {number} stars
-   * @returns {boolean}
-   */
   updateFeedback(courseId, userId, comment, stars) {
+    if (stars < 0 || stars > 5) return false;
+
     const feedbackData = initializeFeedbackData();
-    const feedbackEntry = feedbackData.find(f => f.courseId === courseId);
-    
-    if (!feedbackEntry) {
-      return false;
-    }
+    const feedbackEntry = feedbackData.find(
+      f => String(f.courseId) === String(courseId)
+    );
 
-    const feedbackIndex = feedbackEntry.feedbacks.findIndex(f => f.userId === userId);
-    if (feedbackIndex === -1) {
-      return false;
-    }
+    if (!feedbackEntry) return false;
 
-    // Validate stars rating
-    if (stars < 0 || stars > 5) {
-      return false;
-    }
+    const idx = feedbackEntry.feedbacks.findIndex(
+      f => f.userId === userId
+    );
+    if (idx === -1) return false;
 
-    if(comment === null){
-      feedbackEntry.feedbacks[feedbackIndex] = { 
-        userId, 
-        stars: Number(stars.toFixed(1)) 
-      }
-    }
-    else{
-      feedbackEntry.feedbacks[feedbackIndex] = { 
-        userId, 
-        comment: comment.trim(), 
-        stars: Number(stars.toFixed(1)) 
-      };
-    }
+    feedbackEntry.feedbacks[idx] = {
+      userId,
+      ...(comment ? { comment: comment.trim() } : {}),
+      stars: Number(stars.toFixed(1))
+    };
+
     saveFeedbackData(feedbackData);
+    syncFeedbackToAPI(feedbackData);
     return true;
   },
 
-  /**
-   * Delete feedback
-   * @param {string} courseId
-   * @param {string} userId
-   * @returns {boolean}
-   */
   deleteFeedback(courseId, userId) {
     const feedbackData = initializeFeedbackData();
-    const feedbackEntry = feedbackData.find(f => f.courseId === Number(courseId));
-    
-    if (!feedbackEntry) {
-      return false;
+    const entryIdx = feedbackData.findIndex(
+      f => String(f.courseId) === String(courseId)
+    );
+    if (entryIdx === -1) return false;
+
+    const fbIdx = feedbackData[entryIdx].feedbacks.findIndex(
+      f => f.userId === userId
+    );
+    if (fbIdx === -1) return false;
+
+    feedbackData[entryIdx].feedbacks.splice(fbIdx, 1);
+
+    if (feedbackData[entryIdx].feedbacks.length === 0) {
+      feedbackData.splice(entryIdx, 1);
     }
 
-    const feedbackIndex = feedbackEntry.feedbacks.findIndex(f => f.userId === userId);
-    if (feedbackIndex === -1) {
-      return false;
-    }
-    
-    feedbackEntry.feedbacks.splice(feedbackIndex, 1);
-    
-    // Remove feedback entry if no feedbacks left
-    if (feedbackEntry.feedbacks.length === 0) {
-      const entryIndex = feedbackData.find(f => f.courseId === courseId);
-      feedbackData.splice(entryIndex, 1);
-    }
-    
     saveFeedbackData(feedbackData);
-    
+    syncFeedbackToAPI(feedbackData);
     return true;
   },
-  /**
-   * Auto-sync with course system (call when courses are added/deleted)
-   */
+
   syncWithCourseSystem() {
     const feedbackData = initializeFeedbackData();
-    const currentCourseIds = courseList.map(course => course.id);
-    
-    // Remove feedback for deleted courses
-    const cleanedData = feedbackData.filter(entry => 
-      currentCourseIds.includes(entry.courseId)
+    const courseIds = courseList.map(c => String(c.id));
+
+    const cleaned = feedbackData.filter(f =>
+      courseIds.includes(String(f.courseId))
     );
-    
-    // Add entries for new courses
-    courseList.forEach(course => {
-      const existingEntry = cleanedData.find(entry => entry.courseId === course.id);
-      if (!existingEntry) {
-        // New course - add entry with your structure
-        cleanedData.push({
-          courseId: course.id,
-          feedbacks: []
-        });
+
+    courseIds.forEach(id => {
+      if (!cleaned.some(f => String(f.courseId) === id)) {
+        cleaned.push({ courseId: id, feedbacks: [] });
       }
     });
 
-    saveFeedbackData(cleanedData);
+    saveFeedbackData(cleaned);
+    syncFeedbackToAPI(cleaned);
   }
 };

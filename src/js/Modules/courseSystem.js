@@ -1,94 +1,89 @@
-// Course System module:
-// createCourse, editCourse, deleteCourse, getCourse, listCourses, getAnalytics, enrollUser, searchCoursesByCategory, incrementVisits
-
-import { cleanupCourseData } from './progressSystem.js'; // Function to remove user related data (progress/certificates)
-import { listUsers, updateUser } from "./userSystem.js"
+import { cleanupCourseData } from './progressSystem.js';
+import { listUsers, updateUser } from "./userSystem.js";
+import { api } from './api.js';
+import {mergeItems} from './helper.js'
 
 const STORAGE_KEY_COURSES = "cp_courses_v1";
 
-/**
- * @typedef {Object} Course
- * @property {number} id
- * @property {string} title
- * @property {string} description
- * @property {string} instructor
- * @property {Array<Array>} students - array of [userId, dateEnrolled]
- * @property {Array<string>} categories
- * @property {number} visits
- * @property {number} price
- * @property {string} duration
- */
+/* =========================
+   INTERNAL STATE
+========================= */
 
-export let courseList = loadCourses() || [
-  {
-    id: 1,
-    title: "Multimedia Basics",
-    description: "Intro to multimedia",
-    instructor: "Jana",
-    students: [],
-    categories: ["multimedia", "basics"],
-    visits: 0,
-    price: 200,
-    duration: "3 Weeks"
-  },
-  {
-    id: 2,
-    title: "Graphic Design",
-    description: "Basics of GD",
-    instructor: "Sama",
-    students: [],
-    categories: ["graphic", "design"], 
-    visits: 0,
-    price: 250,
-    duration: "4 Weeks"
-  }
-];
+export let courseList = loadCourses() || [];
 
-/**
- * Load courses from localStorage
- * @returns {Course[]}
- */
+/* =========================
+   STORAGE HELPERS
+========================= */
+
 function loadCourses() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY_COURSES)) || []; } catch (e) { return []; }
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY_COURSES)) || [];
+  } catch (e) {
+    return [];
+  }
 }
 
-/**
- * Save courses to localStorage
- */
-function saveCourses() {
-  try { localStorage.setItem(STORAGE_KEY_COURSES, JSON.stringify(courseList)); } catch (e) { /*ignore*/ }
+async function saveCourses() {
+  try {
+    localStorage.setItem(STORAGE_KEY_COURSES, JSON.stringify(courseList));
+    // Optional backend sync
+    api.post('/courses/sync', JSON.stringify(courseList)).catch(console.error);
+  } catch (e) {}
 }
 
-/**
- * Find index of a course by ID
- * @param {number} id
- * @returns {number} index or -1 if not found
- */
+/* =========================
+   MERGE HELPERS
+========================= */
+
+function mergeCourses(existing, incoming) {
+  const merged = [...existing];
+  const existingIds = new Set(existing.map(c => c.id));
+  incoming.forEach(c => {
+    if (!existingIds.has(c.id)) merged.push(c);
+  });
+  return merged;
+}
+
+/* =========================
+   API FETCH & MERGE
+========================= */
+
+export async function fetchAndMergeCourses(url) {
+  try {
+    const newCourses = await api.get(url);
+    if (!Array.isArray(newCourses)) throw new Error("Invalid courses payload");
+
+    courseList = mergeItems(courseList, newCourses, 'id');
+    saveCourses();
+  } catch (e) {
+    console.error("Failed to fetch courses:", e);
+  }
+}
+
+fetchAndMergeCourses('/courses/');
+
+/* =========================
+   UTILITIES
+========================= */
+
 function _findCourseIndex(id) {
   return courseList.findIndex(c => c.id === id);
 }
 
-/**
- * Generate a unique ID for new course
- * @returns {number}
- */
 function _generateUniqueCourseId() {
   if (courseList.length === 0) return 1;
-  const maxId = Math.max(...courseList.map(c => c.id));
-  return maxId + 1;
+  return Math.max(...courseList.map(c => c.id)) + 1;
 }
 
-/**
- * Create a new course
- * @param {Partial<Course>} course - course data (title is required)
- * @returns {Course|null} created course or null if invalid
- */
+/* =========================
+   CRUD OPERATIONS
+========================= */
+
 export function createCourse(course) {
   if (!course || !course.title) return null;
-  const newId = _generateUniqueCourseId(); 
   const newCourse = {
     ...course,
-    id: newId,
+    id: _generateUniqueCourseId(),
     students: course.students || [],
     categories: course.categories || [],
     visits: course.visits || 0,
@@ -100,12 +95,6 @@ export function createCourse(course) {
   return newCourse;
 }
 
-/**
- * Edit existing course
- * @param {number} id
- * @param {Partial<Course>} data
- * @returns {Course|null} updated course or null if not found
- */
 export function editCourse(id, data) {
   const idx = _findCourseIndex(id);
   if (idx === -1) return null;
@@ -121,41 +110,23 @@ export function editCourse(id, data) {
   return courseList[idx];
 }
 
-/**
- * Delete a course
- * @param {number} id
- * @returns {boolean} true if deleted
- */
-export function deleteCourse(id) {
+export async function deleteCourse(id) {
   const idx = _findCourseIndex(id);
   if (idx === -1) return false;
   courseList.splice(idx, 1);
+  api.delete('/courses/delete', {id})
   saveCourses();
   return true;
 }
 
-/**
- * Get a course by ID
- * @param {number} id
- * @returns {Course|null}
- */
 export function getCourse(id) {
   return courseList.find(c => c.id === id) || null;
 }
 
-/**
- * List all courses
- * @returns {Course[]}
- */
 export function listCourses() {
-  return courseList;
+  return [...courseList];
 }
 
-/**
- * Increment visit count for a course
- * @param {number} courseId
- * @returns {number|null} updated visits or null if not found
- */
 export function incrementVisits(courseId) {
   const c = getCourse(courseId);
   if (!c) return null;
@@ -164,10 +135,10 @@ export function incrementVisits(courseId) {
   return c.visits;
 }
 
-/**
- * Get analytics about courses
- * @returns {{totalCourses: number, totalEnrollments: number, topCourses: Course[], topVisited: Course[]}}
- */
+/* =========================
+   ANALYTICS
+========================= */
+
 export function getAnalytics() {
   const totalCourses = courseList.length;
   const totalEnrollments = courseList.reduce((acc, c) => acc + (c.students?.length || 0), 0);
@@ -176,12 +147,10 @@ export function getAnalytics() {
   return { totalCourses, totalEnrollments, topCourses, topVisited };
 }
 
-/**
- * Enroll a user in a course
- * @param {number|string} userId
- * @param {number} courseId
- * @returns {boolean} true if enrolled successfully
- */
+/* =========================
+   ENROLLMENT
+========================= */
+
 export function enrollUser(userId, courseId) {
   const c = getCourse(courseId);
   if (!c) return false;
@@ -192,40 +161,39 @@ export function enrollUser(userId, courseId) {
   return true;
 }
 
-/**
- * Search courses by category
- * @param {string} category
- * @returns {Course[]}
- */
+/* =========================
+   SEARCH
+========================= */
+
 export function searchCoursesByCategory(category) {
   if (!category || typeof category !== "string") return [];
   return courseList.filter(c => c.categories && c.categories.includes(category));
 }
 
-/**
- * Reset all courses (for testing/cleanup)
- */
-export function resetAllCourses() {
-  courseList = [];
-  localStorage.removeItem(STORAGE_KEY_COURSES);
-}
+/* =========================
+   CLEANUP & DELETION
+========================= */
 
-/**
- * Delete course completely and cleanup all associated data (progress, certificates, student enrollments)
- * @param {number} courseId
- * @returns {boolean} true if deleted
- */
 export function courseDeletion(courseId) {
   const courseDeleted = deleteCourse(courseId);
   if (!courseDeleted) return false;
 
   cleanupCourseData(courseId);
 
-  const students = listUsers().filter(user => user.role === "student");
+  const students = listUsers().filter(u => u.role === "student");
   students.forEach(student => {
     const remainingCourses = student.enrolledCourses.filter(course => String(course) !== String(courseId));
     updateUser(student, { enrolledCourses: remainingCourses });
   });
 
   return true;
+}
+
+/* =========================
+   RESET (for testing)
+========================= */
+
+export function resetAllCourses() {
+  courseList = [];
+  localStorage.removeItem(STORAGE_KEY_COURSES);
 }
