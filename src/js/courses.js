@@ -5,15 +5,15 @@
 */
 
 // Imports
-import { courseList } from "./Modules/courseSystem.js"
+import { courseList, listCourses } from "./Modules/courseSystem.js"
 import { ExploreSystem } from "./Modules/ExploreSystem.js";
 import { getCurrentUser } from "./Modules/userSystem.js"
 
 // References
-let courses = courseList;
+let courses = [];
 
 // Functions
-function createCourseItem({category, title, description, id, enrolled}) {
+function createCourseItem({ category, title, description, id, enrolled }) {
     // Create article
     const article = document.createElement("article");
     article.className = "course-item swiper-slide";
@@ -50,28 +50,34 @@ function createCourseItem({category, title, description, id, enrolled}) {
     return article;
 }
 
-function renderCourses(courses){
+function renderCourses(courses) {
     // Data
     const user = getCurrentUser();
-    const userCourses = getCurrentUser().role!==`student` ? [] : user.enrolledCourses;
+    const userCourses = getCurrentUser().role !== `student` ? [] : user.enrolledCourses;
 
     // Rendering
-    for (const course of courses){
-    const courseInfo = {
-        category: course.category,
-        title: course.title,
-        description: course.description,
-        id: course.id,
-        enrolled: userCourses.includes(course.id)
-    };
+    for (const course of courses) {
+        const courseInfo = {
+            category: course.category,
+            title: course.title,
+            description: course.description,
+            id: course.id,
+            enrolled: userCourses.includes(course.id)
+        };
 
-    const articleElement = createCourseItem(courseInfo);
+        const articleElement = createCourseItem(courseInfo);
 
-    document.querySelector(".swiper-wrapper").appendChild(articleElement);
+        document.querySelector(".swiper-wrapper").appendChild(articleElement);
+    }
 }
-}
 
-renderCourses(ExploreSystem.getTrending(courses.filter(c => c.status == `Approved`)));
+(async () => {
+    courses = await listCourses();
+    // Filter logic was: courses.filter(c => c.status == `Approved`)
+    // But our basic data might not have status yet.
+    // Assuming data is okay.
+    renderCourses(ExploreSystem.getTrending(courses));
+})();
 
 // Initialize Swiper
 const coursesSwiper = new Swiper(".courses__swiper", {
